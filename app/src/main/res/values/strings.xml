@@ -2,4 +2,5 @@
     <string name="app_name">Spotify Streamer</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+
 </resources>
