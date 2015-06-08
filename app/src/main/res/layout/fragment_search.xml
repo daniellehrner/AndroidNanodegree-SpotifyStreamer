@@ -12,7 +12,6 @@
     <ListView
         android:id="@+id/listview_search_result"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/search_text"/>
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>

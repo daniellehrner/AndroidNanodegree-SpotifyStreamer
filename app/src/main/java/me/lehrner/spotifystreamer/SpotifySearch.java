@@ -1,33 +1,79 @@
 package me.lehrner.spotifystreamer;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import java.util.ArrayList;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Artist;
 import kaaes.spotify.webapi.android.models.ArtistsPager;
 
-public class SpotifySearch extends AsyncTask<String, Void, ArrayList<SpotifySearchResult>> {
-    protected ArrayList<SpotifySearchResult> doInBackground(String... artists) {
-        Log.d("SpotifySearch.do", "Start ");
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
-        ArrayList<SpotifySearchResult> searchResult = new ArrayList<>();
+class SpotifySearch {
+    private final SpotifyService spotify;
 
+    SpotifySearch() {
         SpotifyApi api = new SpotifyApi();
-        SpotifyService spotify = api.getService();
-
-        for (String artist : artists) {
-            Log.d("SpotifySearch.do", "Artist = " + artist);
-            ArtistsPager results = spotify.searchArtists(artist);
-        }
-
-        return searchResult;
+        spotify = api.getService();
     }
 
-    protected void onPostExecute(ArrayList<SpotifySearchResult> result) {
-        Log.d("SpotifySearch.Post", "Start ");
+    public void updateListView(String artist, final MainActivity activity) {
+        Log.d("updateView", "Start ");
+
+        final ArrayList<SpotifySearchResult> searchResult = new ArrayList<>();
+
+        Log.d("SpotifySearch.do", "Artist = " + artist);
+
+        spotify.searchArtists(artist, new Callback<ArtistsPager>() {
+            @Override
+            public void success(ArtistsPager pager, Response response) {
+                for (int i = 0; i < pager.artists.limit; i++) {
+                    Artist artist = pager.artists.items.get(i);
+
+                    String artistName = artist.name;
+                    String artistId = artist.id;
+                    String imageUrlMedium = "", imageUrlBig = "";
+
+                    //String artistImageMedium = artist.images.s;
+                    //Log.d("SpotifySearch.do", "Artist = " + artistName + " (" + artistId);
+
+                    int numberImages = artist.images.size();
+
+                    if (numberImages == 4) {
+                        imageUrlMedium = artist.images.get(2).url;
+                        imageUrlBig = artist.images.get(1).url;
+                    }
+                    else if (numberImages == 3) {
+                        imageUrlMedium = artist.images.get(1).url;
+                        imageUrlBig = artist.images.get(0).url;
+                    }
+
+                    /*if (!imageUrlMedium.isEmpty() && !imageUrlBig.isEmpty()) {
+                        Log.d("SpotifySearch.do", "imageUrlMedium = " + imageUrlMedium);
+                        Log.d("SpotifySearch.do", "imageUrlBig = " + imageUrlBig);
+                    }*/
+
+                    SpotifySearchResult newArtist = new SpotifySearchResult(artistName, artistId, imageUrlMedium, imageUrlBig);
+                    searchResult.add(newArtist);
+                }
+
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.artistAdapter.addAll(searchResult);
+                    }
+                });
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                Log.e("SpotifySearch.do", "Error: " + error.toString());
+            }
+        });
     }
 }
 
