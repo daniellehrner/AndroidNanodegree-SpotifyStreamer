@@ -1,17 +1,15 @@
 package me.lehrner.spotifystreamer;
 
-class SpotifySearchResult {
+class SpotifyArtistSearchResult {
     private final String artistName;
     private final String artistId;
     private final String imageMedium;
-    private final String imageBig;
 
-    public SpotifySearchResult(String artistName, String artistId,
-                        String imageMedium, String imageBig) {
+    public SpotifyArtistSearchResult(String artistName, String artistId,
+                                     String imageMedium) {
         this.artistName = artistName;
         this.artistId = artistId;
         this.imageMedium = imageMedium;
-        this.imageBig = imageBig;
     }
 
     public String getArtistName() {
@@ -26,15 +24,10 @@ class SpotifySearchResult {
         return imageMedium;
     }
 
-    public String getImageBig() {
-        return imageBig;
-    }
-
     @Override
     public String toString() {
         return "ArtistName: " + artistName +
                 ", ArtistId: " + artistId +
-                ", ImageMedium: " + imageMedium +
-                ", ImageBig: " + imageBig;
+                ", ImageMedium: " + imageMedium;
     }
 }

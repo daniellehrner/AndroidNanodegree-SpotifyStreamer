@@ -12,30 +12,30 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-class ArtistAdapter extends ArrayAdapter<SpotifySearchResult> {
-    private final List<SpotifySearchResult> mArtistList;
+class ArtistAdapter extends ArrayAdapter<SpotifyArtistSearchResult> {
+    private final List<SpotifyArtistSearchResult> mArtistList;
     private final Context mContext;
     private final int mLayoutId;
 
-    public ArtistAdapter(Context context, int LayoutId, List<SpotifySearchResult> artistList) {
+    public ArtistAdapter(Context context, int LayoutId, List<SpotifyArtistSearchResult> artistList) {
         super(context,LayoutId, artistList);
         mArtistList = artistList;
         mContext = context;
         mLayoutId = LayoutId;
     }
 
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View artistView, ViewGroup parent) {
 
-        // First let's verify the convertView is not null
-        if (convertView == null) {
+        // First let's verify the artistView is not null
+        if (artistView == null) {
             // This a new view we inflate the new layout
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(mLayoutId, parent, false);
+            artistView = inflater.inflate(mLayoutId, parent, false);
         }
         // Now we can fill the layout with the right values
-        ImageView artistImageView = (ImageView) convertView.findViewById(R.id.artist_image_view);
-        TextView artistNameView = (TextView) convertView.findViewById(R.id.artist_name_view);
-        SpotifySearchResult s = mArtistList.get(position);
+        ImageView artistImageView = (ImageView) artistView.findViewById(R.id.artist_image_view);
+        TextView artistNameView = (TextView) artistView.findViewById(R.id.artist_name_view);
+        SpotifyArtistSearchResult s = mArtistList.get(position);
 
         Picasso.with(mContext).cancelRequest(artistImageView);
 
@@ -44,12 +44,12 @@ class ArtistAdapter extends ArrayAdapter<SpotifySearchResult> {
             artistImageView.setContentDescription(mContext.getString(R.string.empty_image));
         }
         else {
-            Picasso.with(mContext).load(s.getImageMedium()).into(artistImageView);
-            artistImageView.setContentDescription(mContext.getString(R.string.album_of) + s.getArtistName());
+            Picasso.with(mContext).load(s.getImageMedium()).placeholder(R.mipmap.ic_mic_black_48dp).into(artistImageView);
+            artistImageView.setContentDescription(mContext.getString(R.string.image_of_artist) + s.getArtistName());
         }
         artistNameView.setText(s.getArtistName());
 
 
-        return convertView;
+        return artistView;
     }
 }

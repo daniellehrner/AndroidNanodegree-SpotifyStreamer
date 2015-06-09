@@ -13,10 +13,10 @@ import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-class SpotifySearch {
+class SpotifyArtistSearch {
     private final SpotifyService spotify;
 
-    SpotifySearch() {
+    SpotifyArtistSearch() {
         SpotifyApi api = new SpotifyApi();
         spotify = api.getService();
     }
@@ -24,9 +24,9 @@ class SpotifySearch {
     public void updateListView(String artist, final MainActivity activity) {
         Log.d("updateView", "Start ");
 
-        final ArrayList<SpotifySearchResult> searchResult = new ArrayList<>();
+        final ArrayList<SpotifyArtistSearchResult> searchResult = new ArrayList<>();
 
-        Log.d("SpotifySearch.do", "Artist = " + artist);
+        Log.d("SpotifyArtistSearch.do", "Artist = " + artist);
 
         spotify.searchArtists(artist, new Callback<ArtistsPager>() {
             @Override
@@ -37,27 +37,25 @@ class SpotifySearch {
 
                         String artistName = artist.name;
                         String artistId = artist.id;
-                        String imageUrlMedium = "", imageUrlBig = "";
+                        String imageUrlMedium = "";
 
                         //String artistImageMedium = artist.images.s;
-                        //Log.d("SpotifySearch.do", "Artist = " + artistName + " (" + artistId);
+                        //Log.d("SpotifyArtistSearch.do", "Artist = " + artistName + " (" + artistId);
 
                         int numberImages = artist.images.size();
 
                         if (numberImages == 4) {
                             imageUrlMedium = artist.images.get(2).url;
-                            imageUrlBig = artist.images.get(1).url;
                         } else if (numberImages == 3) {
                             imageUrlMedium = artist.images.get(1).url;
-                            imageUrlBig = artist.images.get(0).url;
                         }
 
                     /*if (!imageUrlMedium.isEmpty() && !imageUrlBig.isEmpty()) {
-                        Log.d("SpotifySearch.do", "imageUrlMedium = " + imageUrlMedium);
-                        Log.d("SpotifySearch.do", "imageUrlBig = " + imageUrlBig);
+                        Log.d("SpotifyArtistSearch.do", "imageUrlMedium = " + imageUrlMedium);
+                        Log.d("SpotifyArtistSearch.do", "imageUrlBig = " + imageUrlBig);
                     }*/
 
-                        SpotifySearchResult newArtist = new SpotifySearchResult(artistName, artistId, imageUrlMedium, imageUrlBig);
+                        SpotifyArtistSearchResult newArtist = new SpotifyArtistSearchResult(artistName, artistId, imageUrlMedium);
                         searchResult.add(newArtist);
                     }
 
@@ -69,6 +67,7 @@ class SpotifySearch {
                             }
                             else {
                                 activity.addAllAdapter(searchResult);
+                                activity.fadeListViewIn();
                             }
                         }
                     });
@@ -77,7 +76,13 @@ class SpotifySearch {
 
             @Override
             public void failure(RetrofitError error) {
-                Log.e("SpotifySearch.do", "Error: " + error.toString());
+                Log.e("SpotifyArtistSearch.do", "Error: " + error.toString());
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.fadeListViewIn();
+                    }
+                });
                 activity.showToast(activity.getString(R.string.connection_error));
             }
         });
