@@ -68,7 +68,7 @@ class SpotifySearch {
                                 activity.showToast(activity.getString(R.string.no_artist_found));
                             }
                             else {
-                                activity.artistAdapter.addAll(searchResult);
+                                activity.addAllAdapter(searchResult);
                             }
                         }
                     });
@@ -78,6 +78,7 @@ class SpotifySearch {
             @Override
             public void failure(RetrofitError error) {
                 Log.e("SpotifySearch.do", "Error: " + error.toString());
+                activity.showToast(activity.getString(R.string.connection_error));
             }
         });
     }

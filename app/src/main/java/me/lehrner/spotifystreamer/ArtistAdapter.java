@@ -37,6 +37,8 @@ class ArtistAdapter extends ArrayAdapter<SpotifySearchResult> {
         TextView artistNameView = (TextView) convertView.findViewById(R.id.artist_name_view);
         SpotifySearchResult s = mArtistList.get(position);
 
+        Picasso.with(mContext).cancelRequest(artistImageView);
+
         if (s.getImageMedium().isEmpty()) {
             artistImageView.setImageResource(R.mipmap.ic_mic_black_48dp);
             artistImageView.setContentDescription(mContext.getString(R.string.empty_image));

@@ -10,6 +10,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
@@ -19,13 +21,15 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private Toast toast;
-    public ArtistAdapter artistAdapter;
+    private ArtistAdapter artistAdapter;
 
-    private void getArtist(String artist) {
-        Log.d("getArtist", "Artist: " + artist);
-
+    private void updateArtistView(String artist) {
         SpotifySearch spotifySearch = new SpotifySearch();
         spotifySearch.updateListView(artist, this);
+    }
+
+    public void addAllAdapter(ArrayList<SpotifySearchResult> searchResult) {
+        artistAdapter.addAll(searchResult);
     }
 
     public void showToast(String message) {
@@ -58,12 +62,21 @@ public class MainActivity extends AppCompatActivity {
                         R.layout.artist_item_layout, // The name of the layout ID.
                         new ArrayList<SpotifySearchResult>());
 
-        ListView listView = (ListView) findViewById(R.id.listview_search_result);
-        listView.setAdapter(artistAdapter);
+        ListView listviewSearchResult = (ListView) findViewById(R.id.listview_search_result);
+        listviewSearchResult.setAdapter(artistAdapter);
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) findViewById(R.id.search_text);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
+        listviewSearchResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapter, View v, int position, long rowId) {
+                SpotifySearchResult clickedItem = (SpotifySearchResult) adapter.getItemAtPosition(position);
+
+                showToast(clickedItem.getImageMedium());
+            }
+        });
 
         handleIntent(getIntent());
     }
@@ -76,8 +89,7 @@ public class MainActivity extends AppCompatActivity {
                 artistAdapter.clear();
             }
             String query = intent.getStringExtra(SearchManager.QUERY);
-            getArtist(query);
-
+            updateArtistView(query);
         }
     }
 
