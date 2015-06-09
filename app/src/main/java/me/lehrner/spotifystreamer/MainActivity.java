@@ -10,7 +10,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
@@ -20,23 +19,16 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private Toast toast;
-    public ArrayAdapter<SpotifySearchResult> artistAdapter;
+    public ArtistAdapter artistAdapter;
 
     private void getArtist(String artist) {
         Log.d("getArtist", "Artist: " + artist);
 
         SpotifySearch spotifySearch = new SpotifySearch();
-
-        try {
-            spotifySearch.updateListView(artist, this);
-        }
-        catch (IllegalStateException e) {
-            showToast(getString(R.string.connection_error));
-            Log.e("getArtist", "spotifySearch.execute: " + e.toString());
-        }
+        spotifySearch.updateListView(artist, this);
     }
 
-    private void showToast(String message) {
+    public void showToast(String message) {
         toast.setText(message);
         toast.show();
     }
@@ -61,10 +53,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
 
         artistAdapter =
-                new ArrayAdapter<>(
+                new ArtistAdapter(
                         this, // The current context (this activity)
-                        R.layout.list_item_layout, // The name of the layout ID.
-                        R.id.list_item_search_textview, // The ID of the textview to populate.
+                        R.layout.artist_item_layout, // The name of the layout ID.
                         new ArrayList<SpotifySearchResult>());
 
         ListView listView = (ListView) findViewById(R.id.listview_search_result);

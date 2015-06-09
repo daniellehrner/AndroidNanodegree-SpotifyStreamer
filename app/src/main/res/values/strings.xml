@@ -6,6 +6,8 @@
     <string name="search_hint">Search artists on Spotify</string>
 
     <string name="connection_error">Can\'t connect to Spotify</string>
-
+    <string name="empty_image">Placeholder image for album</string>
+    <string name="album_of">Album image of \ </string>
+    <string name="no_artist_found">No artist found</string>
 
 </resources>
