@@ -25,36 +25,52 @@ class TrackAdapter extends ArrayAdapter<SpotifyTrackSearchResult> {
         mLayoutId = LayoutId;
     }
 
-    public View getView(int position, View artistView, ViewGroup parent) {
+    public View getView(int position, View trackView, ViewGroup parent) {
 
-        // First let's verify the artistView is not null
-        if (artistView == null) {
+        ViewHolder viewHolder;
+
+        // First let's verify the trackView is not null
+        if (trackView == null) {
             // This a new view we inflate the new layout
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            artistView = inflater.inflate(mLayoutId, parent, false);
-        }
-        // Now we can fill the layout with the right values
-        ImageView trackImageView = (ImageView) artistView.findViewById(R.id.top_track_image_view);
-        TextView trackSongView = (TextView) artistView.findViewById(R.id.top_track_song_view);
-        TextView trackAlbumView = (TextView) artistView.findViewById(R.id.top_track_album_view);
+            trackView = inflater.inflate(mLayoutId, parent, false);
 
+            viewHolder = new ViewHolder(trackView);
+            trackView.setTag(viewHolder);
+        }
+        else {
+            viewHolder = (ViewHolder) trackView.getTag();
+        }
 
         SpotifyTrackSearchResult t = mTrackList.get(position);
 
-        Picasso.with(mContext).cancelRequest(trackImageView);
+        Picasso.with(mContext).cancelRequest(viewHolder.trackImageView);
 
         if (t.getImageUrlBig().isEmpty()) {
-            trackImageView.setImageResource(R.mipmap.ic_mic_black_48dp);
-            trackImageView.setContentDescription(mContext.getString(R.string.empty_image));
+            viewHolder.trackImageView.setImageResource(R.mipmap.ic_mic_black_48dp);
+            viewHolder.trackImageView.setContentDescription(mContext.getString(R.string.empty_image));
         }
         else {
-            Picasso.with(mContext).load(t.getImageUrlMedium()).placeholder(R.mipmap.ic_mic_black_48dp).into(trackImageView);
-            trackImageView.setContentDescription(mContext.getString(R.string.image_of_album) + t.getAlbumName());
+            Picasso.with(mContext).load(t.getImageUrlMedium()).placeholder(R.mipmap.ic_mic_black_48dp).into(viewHolder.trackImageView);
+            viewHolder.trackImageView.setContentDescription(mContext.getString(R.string.image_of_album) + t.getAlbumName());
         }
-        trackSongView.setText(t.getTrackName());
-        trackAlbumView.setText(t.getAlbumName());
 
-        return artistView;
+        viewHolder.trackSongView.setText(t.getTrackName());
+        viewHolder.trackAlbumView.setText(t.getAlbumName());
+
+        return trackView;
+    }
+
+    public static class ViewHolder {
+        public final ImageView trackImageView;
+        public final TextView trackSongView;
+        public final TextView trackAlbumView;
+
+        public ViewHolder (View view) {
+            trackImageView = (ImageView) view.findViewById(R.id.top_track_image_view);
+            trackSongView = (TextView) view.findViewById(R.id.top_track_song_view);
+            trackAlbumView = (TextView) view.findViewById(R.id.top_track_album_view);
+        }
     }
 }
 

@@ -26,30 +26,46 @@ class ArtistAdapter extends ArrayAdapter<SpotifyArtistSearchResult> {
 
     public View getView(int position, View artistView, ViewGroup parent) {
 
+        ViewHolder viewHolder;
+
         // First let's verify the artistView is not null
         if (artistView == null) {
             // This a new view we inflate the new layout
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             artistView = inflater.inflate(mLayoutId, parent, false);
-        }
-        // Now we can fill the layout with the right values
-        ImageView artistImageView = (ImageView) artistView.findViewById(R.id.artist_image_view);
-        TextView artistNameView = (TextView) artistView.findViewById(R.id.artist_name_view);
-        SpotifyArtistSearchResult s = mArtistList.get(position);
 
-        Picasso.with(mContext).cancelRequest(artistImageView);
-
-        if (s.getImageMedium().isEmpty()) {
-            artistImageView.setImageResource(R.mipmap.ic_mic_black_48dp);
-            artistImageView.setContentDescription(mContext.getString(R.string.empty_image));
+            viewHolder = new ViewHolder(artistView);
+            artistView.setTag(viewHolder);
         }
         else {
-            Picasso.with(mContext).load(s.getImageMedium()).placeholder(R.mipmap.ic_mic_black_48dp).into(artistImageView);
-            artistImageView.setContentDescription(mContext.getString(R.string.image_of_artist) + s.getArtistName());
+            viewHolder = (ViewHolder) artistView.getTag();
         }
-        artistNameView.setText(s.getArtistName());
+
+        SpotifyArtistSearchResult s = mArtistList.get(position);
+
+        Picasso.with(mContext).cancelRequest(viewHolder.artistImageView);
+
+        if (s.getImageMedium().isEmpty()) {
+            viewHolder.artistImageView.setImageResource(R.mipmap.ic_mic_black_48dp);
+            viewHolder.artistImageView.setContentDescription(mContext.getString(R.string.empty_image));
+        }
+        else {
+            Picasso.with(mContext).load(s.getImageMedium()).placeholder(R.mipmap.ic_mic_black_48dp).into(viewHolder.artistImageView);
+            viewHolder.artistImageView.setContentDescription(mContext.getString(R.string.image_of_artist) + s.getArtistName());
+        }
+        viewHolder.artistNameView.setText(s.getArtistName());
 
 
         return artistView;
+    }
+
+    public static class ViewHolder {
+        public final ImageView artistImageView;
+        public final TextView artistNameView;
+
+        public ViewHolder (View view) {
+            artistImageView = (ImageView) view.findViewById(R.id.artist_image_view);
+            artistNameView = (TextView) view.findViewById(R.id.artist_name_view);
+        }
     }
 }
