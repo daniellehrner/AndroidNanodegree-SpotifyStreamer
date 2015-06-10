@@ -75,8 +75,8 @@ public class TopTracks extends AppCompatActivity {
     private void handleIntent(Intent intent) {
         Log.d("handleIntent", "Action: " + intent.getAction());
 
-        mArtistId = intent.getStringExtra(MainActivity.ARTIST_ID);
-        mArtistName = intent.getStringExtra(MainActivity.ARTIST_NAME);
+        mArtistId = intent.getStringExtra(MainActivityFragment.ARTIST_ID);
+        mArtistName = intent.getStringExtra(MainActivityFragment.ARTIST_NAME);
     }
 
     public void addAllAdapter(ArrayList<SpotifyTrackSearchResult> searchResult) {
@@ -108,27 +108,5 @@ public class TopTracks extends AppCompatActivity {
                         mLoadingView.setVisibility(View.GONE);
                     }
                 });
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_top_tracks, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }

@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class ArtistAdapter extends ArrayAdapter<SpotifyArtistSearchResult> {
@@ -22,6 +23,28 @@ class ArtistAdapter extends ArrayAdapter<SpotifyArtistSearchResult> {
         mArtistList = artistList;
         mContext = context;
         mLayoutId = LayoutId;
+    }
+
+    @Override
+    public void clear() {
+        if (mArtistList != null) {
+            mArtistList.clear();
+        }
+        super.clear();
+        addAll(new ArrayList<SpotifyArtistSearchResult>());
+    }
+
+    @Override
+    public int getCount() {
+        return mArtistList.size();
+    }
+    @Override
+    public SpotifyArtistSearchResult getItem(int pos) {
+        return mArtistList.get(pos);
+    }
+    @Override
+    public long getItemId(int position) {
+        return position;
     }
 
     public View getView(int position, View artistView, ViewGroup parent) {

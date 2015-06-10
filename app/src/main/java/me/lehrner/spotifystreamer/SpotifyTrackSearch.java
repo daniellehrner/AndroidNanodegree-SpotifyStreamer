@@ -37,46 +37,65 @@ class SpotifyTrackSearch {
         spotify.getArtistTopTrack(artistId, options, new Callback<Tracks>() {
             @Override
             public void success(Tracks pager, Response response) {
-                if (pager.tracks != null) {
-                    for (int i = 0; i < pager.tracks.size(); i++) {
-                        Track track = pager.tracks.get(i);
+                if (pager == null || pager.tracks == null) {
+                    activity.showToast(activity.getString(R.string.no_track_found));
 
-                        String trackName = track.name;
-                        String trackId = track.id;
-                        String albumName = track.album.name;
-                        String imageUrlMedium = "", imageUrlBig = "";
+                    if (pager == null)
+                        Log.e("TrackUpdateView", "pager is null");
+                    else
+                        Log.e("TrackUpdateView", "pager.tracks is null");
+                    return;
+                }
 
-                        //String artistImageMedium = artist.images.s;
-                        //Log.d("SpotifyArtistSearch.do", "Artist = " + artistName + " (" + artistId);
+                for (int i = 0; i < pager.tracks.size(); i++) {
+                    Track track = pager.tracks.get(i);
 
-                        int numberImages = track.album.images.size();
+                    String trackName = track.name;
+                    String trackId = track.id;
+                    String albumName = "", imageUrlMedium = "", imageUrlBig = "";
 
-                        if (numberImages == 4) {
-                            imageUrlBig = track.album.images.get(1).url;
-                            imageUrlMedium = track.album.images.get(2).url;
-                        } else if (numberImages == 3) {
-                            imageUrlBig = track.album.images.get(0).url;
-                            imageUrlMedium = track.album.images.get(1).url;
-                        }
+                    //String artistImageMedium = artist.images.s;
+                    //Log.d("SpotifyArtistSearch.do", "Artist = " + artistName + " (" + artistId);
 
-                        SpotifyTrackSearchResult newTrack = new SpotifyTrackSearchResult(trackName,
-                                trackId, albumName, imageUrlMedium, imageUrlBig);
-                        searchResult.add(newTrack);
-                    }
+                    if (track.album != null) {
+                        albumName = track.album.name;
 
-                    activity.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (searchResult.isEmpty()) {
-                                activity.showToast(activity.getString(R.string.no_track_found));
-                                activity.finish();
-                            } else {
-                                activity.addAllAdapter(searchResult);
-                                activity.fadeListViewIn();
+                        if (track.album.images != null) {
+                            int numberImages = track.album.images.size();
+
+                            if (numberImages == 4) {
+                                imageUrlBig = track.album.images.get(1).url;
+                                imageUrlMedium = track.album.images.get(2).url;
+                            } else if (numberImages == 3) {
+                                imageUrlBig = track.album.images.get(0).url;
+                                imageUrlMedium = track.album.images.get(1).url;
                             }
                         }
-                    });
+                        else {
+                            Log.e("TrackUpdateView", "track.album.images is null");
+                        }
+                    }
+                    else {
+                        Log.e("TrackUpdateView", "track.album is null");
+                    }
+
+                    SpotifyTrackSearchResult newTrack = new SpotifyTrackSearchResult(trackName,
+                            trackId, albumName, imageUrlMedium, imageUrlBig);
+                    searchResult.add(newTrack);
                 }
+
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (searchResult.isEmpty()) {
+                            activity.showToast(activity.getString(R.string.no_track_found));
+                            activity.finish();
+                        } else {
+                            activity.addAllAdapter(searchResult);
+                            activity.fadeListViewIn();
+                        }
+                    }
+                });
             }
 
             @Override
