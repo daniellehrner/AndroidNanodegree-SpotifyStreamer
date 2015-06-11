@@ -73,11 +73,16 @@ class ArtistAdapter extends ArrayAdapter<SpotifyArtistSearchResult> {
             viewHolder.artistImageView.setContentDescription(mContext.getString(R.string.empty_image));
         }
         else {
-            Picasso.with(mContext).load(s.getImageMedium()).placeholder(R.drawable.ic_mic_black_48dp).into(viewHolder.artistImageView);
+            Picasso.with(mContext).
+                    load(s.getImageMedium())
+                    .fit()
+                    .centerCrop()
+                    .placeholder(R.drawable.ic_mic_black_48dp).
+                    into(viewHolder.artistImageView);
             viewHolder.artistImageView.setContentDescription(mContext.getString(R.string.image_of_artist) + s.getArtistName());
         }
-        viewHolder.artistNameView.setText(s.getArtistName());
 
+        viewHolder.artistNameView.setText(s.getArtistName());
 
         return artistView;
     }

@@ -51,7 +51,12 @@ class TrackAdapter extends ArrayAdapter<SpotifyTrackSearchResult> {
             viewHolder.trackImageView.setContentDescription(mContext.getString(R.string.empty_image));
         }
         else {
-            Picasso.with(mContext).load(t.getImageUrlMedium()).placeholder(R.drawable.ic_mic_black_48dp).into(viewHolder.trackImageView);
+            Picasso.with(mContext)
+                    .load(t.getImageUrlMedium())
+                    .fit()
+                    .centerCrop()
+                    .placeholder(R.drawable.ic_mic_black_48dp)
+                    .into(viewHolder.trackImageView);
             viewHolder.trackImageView.setContentDescription(mContext.getString(R.string.image_of_album) + t.getAlbumName());
         }
 
