@@ -33,6 +33,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="me.lehrner.spotifystreamer.MainActivity" />
         </activity>
+        <provider android:name=".ArtistSuggestionProvider"
+            android:exported="false"
+            android:authorities="me.lehrner.ArtistSuggestionProvider" />
+
     </application>
 
 </manifest>

@@ -7,7 +7,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -109,6 +111,14 @@ public class MainActivityFragment extends Fragment {
     public void addAllAdapter(ArrayList<SpotifyArtistSearchResult> searchResult) {
         mArtists = searchResult;
         mAdapter.addAll(searchResult);
+    }
+
+    public void saveLastSearchQuery () {
+        Log.d("saveLastSearchQuery", "saving: " + mLastArtist);
+        SearchRecentSuggestions suggestions = new SearchRecentSuggestions(mContext,
+                ArtistSuggestionProvider.AUTHORITY, ArtistSuggestionProvider.MODE);
+        suggestions.saveRecentQuery(mLastArtist, null);
+
     }
 
     public void updateArtistView(String artist) {

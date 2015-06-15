@@ -4,6 +4,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -76,10 +77,19 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.action_clear_history:
+                clearSearchSuggestions();
+                mFragment.showToast("Cleared search suggestions");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void clearSearchSuggestions() {
+        Log.d("clearSearchSuggestions", "clear search history");
+        SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
+                ArtistSuggestionProvider.AUTHORITY, ArtistSuggestionProvider.MODE);
+        suggestions.clearHistory();
     }
 
     @Override

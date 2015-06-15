@@ -75,12 +75,12 @@ class SpotifyArtistSearch {
                     public void run() {
                         if (searchResult.isEmpty()) {
                             fragment.showToast(fragment.getString(R.string.no_artist_found));
-                            fragment.fadeListViewIn();
                         }
                         else {
                             fragment.addAllAdapter(searchResult);
-                            fragment.fadeListViewIn();
+                            fragment.saveLastSearchQuery();
                         }
+                        fragment.fadeListViewIn();
                     }
                 });
             }
