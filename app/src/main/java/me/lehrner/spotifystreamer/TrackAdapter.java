@@ -9,7 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 
 import java.util.List;
 
@@ -44,19 +44,18 @@ class TrackAdapter extends ArrayAdapter<SpotifyTrackSearchResult> {
 
         SpotifyTrackSearchResult t = mTrackList.get(position);
 
-        Picasso.with(mContext).cancelRequest(viewHolder.trackImageView);
+        Glide.clear(viewHolder.trackImageView);
 
         if (t.getImageUrlBig().isEmpty()) {
             viewHolder.trackImageView.setImageResource(R.drawable.ic_mic_black_48dp);
             viewHolder.trackImageView.setContentDescription(mContext.getString(R.string.empty_image));
         }
         else {
-            Picasso.with(mContext)
+            Glide.with(mContext)
                     .load(t.getImageUrlMedium())
-                    .fit()
-                    .centerCrop()
                     .placeholder(R.drawable.ic_mic_black_48dp)
                     .into(viewHolder.trackImageView);
+
             viewHolder.trackImageView.setContentDescription(mContext.getString(R.string.image_of_album) + t.getAlbumName());
         }
 

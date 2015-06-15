@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
+import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,19 +66,18 @@ class ArtistAdapter extends ArrayAdapter<SpotifyArtistSearchResult> {
 
         SpotifyArtistSearchResult s = mArtistList.get(position);
 
-        Picasso.with(mContext).cancelRequest(viewHolder.artistImageView);
+        Glide.clear(viewHolder.artistImageView);
 
         if (s.getImageMedium().isEmpty()) {
             viewHolder.artistImageView.setImageResource(R.drawable.ic_mic_black_48dp);
             viewHolder.artistImageView.setContentDescription(mContext.getString(R.string.empty_image));
         }
         else {
-            Picasso.with(mContext).
-                    load(s.getImageMedium())
-                    .fit()
-                    .centerCrop()
-                    .placeholder(R.drawable.ic_mic_black_48dp).
-                    into(viewHolder.artistImageView);
+            Glide.with(mContext)
+                    .load(s.getImageMedium())
+                    .placeholder(R.drawable.ic_mic_black_48dp)
+                    .into(viewHolder.artistImageView);
+
             viewHolder.artistImageView.setContentDescription(mContext.getString(R.string.image_of_artist) + s.getArtistName());
         }
 
