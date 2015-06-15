@@ -1,45 +1,24 @@
 package me.lehrner.spotifystreamer;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.ListView;
-import android.widget.Toast;
-
-import java.util.ArrayList;
 
 
 public class TopTracks extends AppCompatActivity {
-    private String mArtistId;
+    private static final String FRAGMENT = "me.lehrner.spotifystreamer.TopTracksFragment";
+    private TopTracksFragment mFragment;
+
     private String mArtistName;
-    private ListView mListView;
-    private View mLoadingView;
-    private int mShortAnimationDuration;
+    private String mArtistId;
 
-    private Toast toast;
-    private TrackAdapter trackAdapter;
-
-    @SuppressLint("ShowToast")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.d("TopTracks.onCreate", "start");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top_tracks);
-
-        mListView = (ListView) findViewById(R.id.listview_track_search_result);
-        mLoadingView = findViewById(R.id.loading_spinner);
-
-        // Retrieve and cache the system's default "short" animation time.
-        mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-        handleIntent(getIntent());
 
         ActionBar actionBar = getSupportActionBar();
 
@@ -50,24 +29,19 @@ public class TopTracks extends AppCompatActivity {
             Log.e("TopTracks.onCreate", "Can't set actionbar subtitle");
         }
 
-        Context context = getApplicationContext();
-        toast = Toast.makeText(context, " ", Toast.LENGTH_SHORT);
+        if (savedInstanceState != null) {
+            //Restore the fragment's instance
+            mFragment = (TopTracksFragment) getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT);
+        }
+        else {
+            mFragment = (TopTracksFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_tracks);
+        }
 
-        trackAdapter =
-                new TrackAdapter(
-                        this, // The current context (this activity)
-                        R.layout.top_tracks_item_layout, // The name of the layout ID.
-                        new ArrayList<SpotifyTrackSearchResult>());
-
-        mListView.setAdapter(trackAdapter);
-
-        SpotifyTrackSearch spotifySearch = new SpotifyTrackSearch();
-        spotifySearch.updateListView(mArtistId, this);
+        handleIntent(getIntent());
     }
 
-    public void showToast(String message) {
-        toast.setText(message);
-        toast.show();
+    public String getArtistId() {
+        return mArtistId;
     }
 
     private void handleIntent(Intent intent) {
@@ -77,34 +51,11 @@ public class TopTracks extends AppCompatActivity {
         mArtistName = intent.getStringExtra(MainActivityFragment.ARTIST_NAME);
     }
 
-    public void addAllAdapter(ArrayList<SpotifyTrackSearchResult> searchResult) {
-        trackAdapter.addAll(searchResult);
-    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
 
-    public void fadeListViewIn() {
-        // Set the content view to 0% opacity but visible, so that it is visible
-        // (but fully transparent) during the animation.
-        mListView.setAlpha(0f);
-        mListView.setVisibility(View.VISIBLE);
-
-        // Animate the content view to 100% opacity, and clear any animation
-        // listener set on the view.
-        mListView.animate()
-                .alpha(1f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(null);
-
-        // Animate the loading view to 0% opacity. After the animation ends,
-        // set its visibility to GONE as an optimization step (it won't
-        // participate in layout passes, etc.)
-        mLoadingView.animate()
-                .alpha(0f)
-                .setDuration(mShortAnimationDuration)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mLoadingView.setVisibility(View.GONE);
-                    }
-                });
+        //Save the fragment's instance
+        getSupportFragmentManager().putFragment(outState, FRAGMENT, mFragment);
     }
 }

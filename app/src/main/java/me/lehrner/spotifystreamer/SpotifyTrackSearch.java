@@ -27,7 +27,7 @@ class SpotifyTrackSearch {
         options.put("country", Locale.getDefault().getCountry());
     }
 
-    public void updateListView(String artistId, final TopTracks activity) {
+    public void updateListView(String artistId, final TopTracks activity, final TopTracksFragment fragment) {
         Log.d("TrackUpdateView", "Start ");
 
         final ArrayList<SpotifyTrackSearchResult> searchResult = new ArrayList<>();
@@ -38,7 +38,7 @@ class SpotifyTrackSearch {
             @Override
             public void success(Tracks pager, Response response) {
                 if (pager == null || pager.tracks == null) {
-                    activity.showToast(activity.getString(R.string.no_track_found));
+                    fragment.showToast(activity.getString(R.string.no_track_found));
 
                     if (pager == null)
                         Log.e("TrackUpdateView", "pager is null");
@@ -88,11 +88,11 @@ class SpotifyTrackSearch {
                     @Override
                     public void run() {
                         if (searchResult.isEmpty()) {
-                            activity.showToast(activity.getString(R.string.no_track_found));
+                            fragment.showToast(activity.getString(R.string.no_track_found));
                             activity.finish();
                         } else {
-                            activity.addAllAdapter(searchResult);
-                            activity.fadeListViewIn();
+                            fragment.addAllAdapter(searchResult);
+                            fragment.fadeListViewIn();
                         }
                     }
                 });
@@ -105,10 +105,10 @@ class SpotifyTrackSearch {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        activity.fadeListViewIn();
+                        fragment.fadeListViewIn();
                     }
                 });
-                activity.showToast(activity.getString(R.string.connection_error));
+                fragment.showToast(activity.getString(R.string.connection_error));
             }
         });
     }

@@ -88,7 +88,7 @@ public class MainActivityFragment extends Fragment {
         ArrayList<SpotifyArtistSearchResult> artistsListTemp;
 
         if(savedInstanceState != null) {
-            // read the person list from the saved state
+            // read the artist list from the saved state
             artistsListTemp = savedInstanceState.getParcelableArrayList(KEY_ARTIST_LIST);
             mListView.onRestoreInstanceState(savedInstanceState.getParcelable(KEY_LIST_VIEW));
             mLastArtist = savedInstanceState.getString(KEY_LAST_ARTIST);

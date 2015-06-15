@@ -58,9 +58,6 @@ class SpotifyArtistSearchResult implements Parcelable {
         dest.writeBundle(bundle);
     }
 
-    /**
-     * Creator required for class implementing the parcelable interface.
-     */
     public static final Parcelable.Creator<SpotifyArtistSearchResult> CREATOR = new Creator<SpotifyArtistSearchResult>() {
 
         @Override
