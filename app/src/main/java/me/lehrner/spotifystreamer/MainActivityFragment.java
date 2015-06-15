@@ -62,12 +62,6 @@ public class MainActivityFragment extends Fragment {
         // Retrieve and cache the system's default "short" animation time.
         mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-        mListView = (ListView) mRootView.findViewById(R.id.listview_search_result);
-        mLoadingView = mRootView.findViewById(R.id.loading_spinner_artist);
-
-        // Retrieve and cache the system's default "short" animation time.
-        mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
         mAdapter = new ArtistAdapter(
                         mContext, // The current context (this activity)
                         R.layout.artist_item_layout, // The name of the layout ID.
@@ -118,7 +112,6 @@ public class MainActivityFragment extends Fragment {
         SearchRecentSuggestions suggestions = new SearchRecentSuggestions(mContext,
                 ArtistSuggestionProvider.AUTHORITY, ArtistSuggestionProvider.MODE);
         suggestions.saveRecentQuery(mLastArtist, null);
-
     }
 
     public void updateArtistView(String artist) {

@@ -50,9 +50,6 @@ class SpotifyArtistSearch {
                     String artistId = artist.id;
                     String imageUrlMedium = "";
 
-                    //String artistImageMedium = artist.images.s;
-                    //Log.d("SpotifyArtistSearch.do", "Artist = " + artistName + " (" + artistId);
-
                     if (artist.images != null) {
                         int numberImages = artist.images.size();
 

@@ -1,6 +1,5 @@
 package me.lehrner.spotifystreamer;
 
-
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -77,4 +76,3 @@ class TrackAdapter extends ArrayAdapter<SpotifyTrackSearchResult> {
         }
     }
 }
-

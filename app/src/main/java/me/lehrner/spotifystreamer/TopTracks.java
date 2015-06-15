@@ -6,11 +6,9 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-
 public class TopTracks extends AppCompatActivity {
     private static final String FRAGMENT = "me.lehrner.spotifystreamer.TopTracksFragment";
     private TopTracksFragment mFragment;
-
     private String mArtistName;
     private String mArtistId;
 
