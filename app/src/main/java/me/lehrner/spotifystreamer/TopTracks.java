@@ -20,9 +20,12 @@ public class TopTracks extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top_tracks);
 
+        handleIntent(getIntent());
+
         ActionBar actionBar = getSupportActionBar();
 
         if (actionBar != null) {
+            Log.d("TopTracks.onCreate", "subtitle: " + mArtistName);
             actionBar.setSubtitle(mArtistName);
         }
         else {
@@ -36,8 +39,6 @@ public class TopTracks extends AppCompatActivity {
         else {
             mFragment = (TopTracksFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_tracks);
         }
-
-        handleIntent(getIntent());
     }
 
     public String getArtistId() {
