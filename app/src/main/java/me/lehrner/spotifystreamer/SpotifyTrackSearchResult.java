@@ -6,22 +6,22 @@ import android.os.Parcelable;
 
 class SpotifyTrackSearchResult implements Parcelable {
     private static final String KEY_TRACK_NAME = "me.lehrner.spotifystreamer.trackName";
-    private static final String KEY_TRACK_ID = "me.lehrner.spotifystreamer.trackId";
+    private static final String KEY_TRACK_URL = "me.lehrner.spotifystreamer.trackUrl";
     private static final String KEY_ALBUM_NAME = "me.lehrner.spotifystreamer.albumName";
     private static final String KEY_IMAGE_TRACK_MEDIUM = "me.lehrner.spotifystreamer.imageTrackMedium";
     private static final String KEY_IMAGE_TRACK_BIG = "me.lehrner.spotifystreamer.imageTrackBig";
 
     private final String trackName;
-    private final String trackId;
+    private final String trackUrl;
     private final String albumName;
     private final String imageUrlMedium;
     private final String imageUrlBig;
 
-    public SpotifyTrackSearchResult(String trackName, String trackId,
+    public SpotifyTrackSearchResult(String trackName, String trackUrl,
                                     String albumName, String imageUrlMedium,
                                     String imageUrlBig) {
         this.trackName = trackName;
-        this.trackId = trackId;
+        this.trackUrl = trackUrl;
         this.albumName = albumName;
         this.imageUrlMedium = imageUrlMedium;
         this.imageUrlBig = imageUrlBig;
@@ -31,8 +31,8 @@ class SpotifyTrackSearchResult implements Parcelable {
         return trackName;
     }
 
-    public String getTrackId() {
-        return trackId;
+    public String getTrackUrl() {
+        return trackUrl;
     }
 
     public String getAlbumName() {
@@ -50,7 +50,7 @@ class SpotifyTrackSearchResult implements Parcelable {
     @Override
     public String toString() {
         return "TrackName: " + trackName +
-                ", TrackId: " + trackId +
+                ", TrackUrl: " + trackUrl +
                 ", AlbumName: " + albumName +
                 ", ImageUrlBig: " + imageUrlBig;
     }
@@ -67,7 +67,7 @@ class SpotifyTrackSearchResult implements Parcelable {
 
         // insert the key value pairs to the bundle
         bundle.putString(KEY_TRACK_NAME, trackName);
-        bundle.putString(KEY_TRACK_ID, trackId);
+        bundle.putString(KEY_TRACK_URL, trackUrl);
         bundle.putString(KEY_ALBUM_NAME, albumName);
         bundle.putString(KEY_IMAGE_TRACK_MEDIUM, imageUrlMedium);
         bundle.putString(KEY_IMAGE_TRACK_BIG, imageUrlBig);
@@ -86,7 +86,7 @@ class SpotifyTrackSearchResult implements Parcelable {
             // instantiate a person using values from the bundle
             return new SpotifyTrackSearchResult(
                     bundle.getString(KEY_TRACK_NAME),
-                    bundle.getString(KEY_TRACK_ID),
+                    bundle.getString(KEY_TRACK_URL),
                     bundle.getString(KEY_ALBUM_NAME),
                     bundle.getString(KEY_IMAGE_TRACK_MEDIUM),
                     bundle.getString(KEY_IMAGE_TRACK_BIG));

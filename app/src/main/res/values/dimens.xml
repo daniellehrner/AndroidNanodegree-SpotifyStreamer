@@ -3,4 +3,8 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="thumbnail_size">75dp</dimen>
+    <dimen name="player_album_size">220dp</dimen>
+    <dimen name="player_text_size">20sp</dimen>
+    <dimen name="player_button_size">75dp</dimen>
+    <dimen name="player_margin">35dp</dimen>
 </resources>

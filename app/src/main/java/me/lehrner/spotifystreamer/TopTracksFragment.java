@@ -5,12 +5,14 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -19,6 +21,11 @@ import java.util.ArrayList;
 public class TopTracksFragment extends Fragment {
     private static final String KEY_TRACK_LIST = "me.lehrner.spotifystreamer.tracks";
     private static final String KEY_LIST_VIEW = "me.lehrner.spotifystreamer.track.listview";
+    public final static String ARTIST_NAME = "me.lehrner.spotifystreamer.ARTISTNAME";
+    public final static String ALBUM_NAME = "me.lehrner.spotifystreamer.ALBUMNAME";
+    public final static String TRACK_NAME = "me.lehrner.spotifystreamer.TRACKNAME";
+    public final static String TRACK_URL = "me.lehrner.spotifystreamer.TRACKURL";
+    public final static String ALBUM_IMAGE = "me.lehrner.spotifystreamer.ALBUMIMAGE";
 
     private ListView mListView;
     private ArrayList<SpotifyTrackSearchResult> mTracks;
@@ -27,6 +34,7 @@ public class TopTracksFragment extends Fragment {
     private Toast toast;
     private TrackAdapter mTrackAdapter;
     private TopTracks mActivity;
+    private Context mContext;
 
     public TopTracksFragment() {
     }
@@ -50,7 +58,7 @@ public class TopTracksFragment extends Fragment {
         // Retrieve and cache the system's default "short" animation time.
         mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-        Context mContext = getActivity();
+        mContext = getActivity();
         toast = Toast.makeText(mContext, " ", Toast.LENGTH_SHORT);
 
         mTrackAdapter =
@@ -60,6 +68,21 @@ public class TopTracksFragment extends Fragment {
                         new ArrayList<SpotifyTrackSearchResult>());
 
         mListView.setAdapter(mTrackAdapter);
+
+        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapter, View v, int position, long rowId) {
+                SpotifyTrackSearchResult clickedItem = (SpotifyTrackSearchResult) adapter.getItemAtPosition(position);
+
+                Intent playerIntent = new Intent(mContext, PlayerActivity.class);
+                playerIntent.putExtra(ARTIST_NAME, mActivity.getArtistName());
+                playerIntent.putExtra(ALBUM_NAME, clickedItem.getAlbumName());
+                playerIntent.putExtra(TRACK_NAME, clickedItem.getTrackName());
+                playerIntent.putExtra(TRACK_URL, clickedItem.getTrackUrl());
+                playerIntent.putExtra(ALBUM_IMAGE, clickedItem.getImageUrlBig());
+                startActivity(playerIntent);
+            }
+        });
 
         SpotifyTrackSearch spotifySearch = new SpotifyTrackSearch();
 

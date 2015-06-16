@@ -11,5 +11,8 @@
     <string name="no_track_found">No tracks available</string>
     <string name="title_activity_top_tracks">Top Tracks</string>
     <string name="same_artist">Search not changed</string>
+    <string name="title_activity_player">PlayerActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
 
 </resources>

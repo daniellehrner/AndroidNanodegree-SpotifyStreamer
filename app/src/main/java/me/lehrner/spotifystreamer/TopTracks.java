@@ -39,6 +39,10 @@ public class TopTracks extends AppCompatActivity {
         }
     }
 
+    public String getArtistName () {
+        return mArtistName;
+    }
+
     public String getArtistId() {
         return mArtistId;
     }

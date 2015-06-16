@@ -51,7 +51,7 @@ class SpotifyTrackSearch {
                     Track track = pager.tracks.get(i);
 
                     String trackName = track.name;
-                    String trackId = track.id;
+                    String trackUrl = track.preview_url;
                     String albumName = "", imageUrlMedium = "", imageUrlBig = "";
 
                     //String artistImageMedium = artist.images.s;
@@ -80,7 +80,7 @@ class SpotifyTrackSearch {
                     }
 
                     SpotifyTrackSearchResult newTrack = new SpotifyTrackSearchResult(trackName,
-                            trackId, albumName, imageUrlMedium, imageUrlBig);
+                            trackUrl, albumName, imageUrlMedium, imageUrlBig);
                     searchResult.add(newTrack);
                 }
 
