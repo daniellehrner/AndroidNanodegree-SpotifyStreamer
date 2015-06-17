@@ -2,7 +2,6 @@
     <string name="app_name">Spotify Streamer</string>
     <string name="action_clear_history">Clear search history</string>
     <string name="search_hint">Search artists on Spotify</string>
-
     <string name="connection_error">Can\'t connect to Spotify</string>
     <string name="empty_image">Placeholder image for album</string>
     <string name="image_of_artist">Image of \ </string>
@@ -11,8 +10,6 @@
     <string name="no_track_found">No tracks available</string>
     <string name="title_activity_top_tracks">Top Tracks</string>
     <string name="same_artist">Search not changed</string>
-    <string name="title_activity_player">PlayerActivity</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
 </resources>

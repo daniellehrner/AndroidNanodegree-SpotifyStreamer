@@ -20,7 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Album"
-        android:textSize="@dimen/player_text_size"
+        android:textSize="@dimen/player_album_text_size"
         android:layout_below="@id/player_artist_name"/>
 
     <ImageView
@@ -39,36 +39,11 @@
         android:layout_height="wrap_content"
         android:text="Track name"
         android:textSize="@dimen/player_text_size"
-        android:layout_below="@+id/player_image_view"
+        android:layout_below="@id/player_image_view"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="@dimen/player_margin" />
 
-    <ProgressBar android:id="@+id/player_time_progress"
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/player_margin"
-        android:layout_below="@+id/player_track_name" />
-
-    <TextView
-        android:id="@+id/player_time_start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0:00"
-        android:textSize="@dimen/player_text_size"
-        android:layout_below="@id/player_time_progress"/>
-
-    <TextView
-        android:id="@+id/player_time_end"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="0:30"
-        android:textSize="@dimen/player_text_size"
-        android:layout_below="@+id/player_time_progress"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true" />
-
-    <ImageView
+    <ImageButton
         android:id="@+id/player_image_previous"
         android:layout_width="@dimen/player_button_size"
         android:layout_height="@dimen/player_button_size"
@@ -78,7 +53,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/player_image_play"
         android:layout_width="@dimen/player_button_size"
         android:layout_height="@dimen/player_button_size"
@@ -87,14 +62,38 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 
-    <ImageView
+    <ImageButton
         android:id="@+id/player_image_next"
         android:layout_width="@dimen/player_button_size"
         android:layout_height="@dimen/player_button_size"
         android:src="@drawable/ic_skip_next_black_48dp"
         android:contentDescription="@string/empty_image"
-        android:layout_alignTop="@+id/player_image_play"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"/>
+
+    <TextView
+        android:id="@+id/player_time_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0:00"
+        android:textSize="@dimen/player_text_size"
+        android:layout_above="@id/player_image_previous"/>
+
+    <TextView
+        android:id="@+id/player_time_end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0:30"
+        android:textSize="@dimen/player_text_size"
+        android:layout_above="@id/player_image_next"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
+
+    <SeekBar android:id="@+id/player_time_progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/player_time_start" />
 
 </RelativeLayout>

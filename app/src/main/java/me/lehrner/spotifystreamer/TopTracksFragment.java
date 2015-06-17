@@ -21,6 +21,8 @@ import java.util.ArrayList;
 public class TopTracksFragment extends Fragment {
     private static final String KEY_TRACK_LIST = "me.lehrner.spotifystreamer.tracks";
     private static final String KEY_LIST_VIEW = "me.lehrner.spotifystreamer.track.listview";
+    public final static String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.track.artistId";
+
     public final static String ARTIST_NAME = "me.lehrner.spotifystreamer.ARTISTNAME";
     public final static String ALBUM_NAME = "me.lehrner.spotifystreamer.ALBUMNAME";
     public final static String TRACK_NAME = "me.lehrner.spotifystreamer.TRACKNAME";
@@ -35,6 +37,7 @@ public class TopTracksFragment extends Fragment {
     private TrackAdapter mTrackAdapter;
     private TopTracks mActivity;
     private Context mContext;
+    private String mArtistId;
 
     public TopTracksFragment() {
     }
@@ -52,7 +55,6 @@ public class TopTracksFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        mListView = (ListView) mRootView.findViewById(R.id.listview_track_search_result);
         mLoadingView = mRootView.findViewById(R.id.loading_spinner);
 
         // Retrieve and cache the system's default "short" animation time.
@@ -67,11 +69,15 @@ public class TopTracksFragment extends Fragment {
                         R.layout.top_tracks_item_layout, // The name of the layout ID.
                         new ArrayList<SpotifyTrackSearchResult>());
 
+        mListView = (ListView) mRootView.findViewById(R.id.listview_track_search_result);
+
         mListView.setAdapter(mTrackAdapter);
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapter, View v, int position, long rowId) {
+//                mActivity.addToBackStack();
+
                 SpotifyTrackSearchResult clickedItem = (SpotifyTrackSearchResult) adapter.getItemAtPosition(position);
 
                 Intent playerIntent = new Intent(mContext, PlayerActivity.class);
@@ -84,20 +90,22 @@ public class TopTracksFragment extends Fragment {
             }
         });
 
-        SpotifyTrackSearch spotifySearch = new SpotifyTrackSearch();
-
         if (savedInstanceState != null) {
             Log.d("TrackOnActivityCreated", "is a saved instance");
 
-            mTracks = savedInstanceState.getParcelableArrayList(KEY_TRACK_LIST);
             mListView.onRestoreInstanceState(savedInstanceState.getParcelable(KEY_LIST_VIEW));
+            mTracks = savedInstanceState.getParcelableArrayList(KEY_TRACK_LIST);
+            mArtistId = savedInstanceState.getString(KEY_ARTIST_ID);
 
             addAllAdapter(mTracks);
             fadeListViewIn();
 
-        } else {
+        }
+        else {
             Log.d("TrackOnActivityCreated", "is not  a saved instance");
-            spotifySearch.updateListView(mActivity.getArtistId(), mActivity, this);
+            mArtistId = mActivity.getArtistId();
+            SpotifyTrackSearch spotifySearch = new SpotifyTrackSearch();
+            spotifySearch.updateListView(mArtistId, mActivity, this);
         }
     }
 
@@ -146,9 +154,10 @@ public class TopTracksFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
         outState.putParcelableArrayList(KEY_TRACK_LIST, mTracks);
         outState.putParcelable(KEY_LIST_VIEW, mListView.onSaveInstanceState());
-
-        super.onSaveInstanceState(outState);
+        outState.putString(KEY_ARTIST_ID, mArtistId);
     }
 }

@@ -13,6 +13,8 @@ import android.view.MenuItem;
 
 import android.widget.SearchView;
 
+import com.bumptech.glide.Glide;
+
 public class MainActivity extends AppCompatActivity {
     private static final String FRAGMENT = "me.lehrner.spotifystreamer.MainActivityFragment";
     private MainActivityFragment mFragment;
@@ -97,5 +99,11 @@ public class MainActivity extends AppCompatActivity {
 
         //Save the fragment's instance
         getSupportFragmentManager().putFragment(outState, FRAGMENT, mFragment);
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        Glide.get(this).trimMemory(level);
     }
 }
