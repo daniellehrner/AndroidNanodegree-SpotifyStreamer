@@ -21,7 +21,7 @@ import java.util.ArrayList;
 public class TopTracksFragment extends Fragment {
     private static final String KEY_TRACK_LIST = "me.lehrner.spotifystreamer.tracks";
     private static final String KEY_LIST_VIEW = "me.lehrner.spotifystreamer.track.listview";
-    public final static String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.track.artistId";
+    private final static String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.track.artistId";
 
     public final static String ARTIST_NAME = "me.lehrner.spotifystreamer.ARTISTNAME";
     public final static String ALBUM_NAME = "me.lehrner.spotifystreamer.ALBUMNAME";
@@ -76,8 +76,6 @@ public class TopTracksFragment extends Fragment {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapter, View v, int position, long rowId) {
-//                mActivity.addToBackStack();
-
                 SpotifyTrackSearchResult clickedItem = (SpotifyTrackSearchResult) adapter.getItemAtPosition(position);
 
                 Intent playerIntent = new Intent(mContext, PlayerActivity.class);

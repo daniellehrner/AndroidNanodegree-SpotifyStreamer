@@ -8,18 +8,18 @@
 
     <TextView
         android:id="@+id/player_artist_name"
+        android:singleLine="true"
         android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Artist"
         android:textSize="@dimen/player_text_size"/>
 
     <TextView
         android:id="@+id/player_album_name"
+        android:singleLine="true"
         android:layout_centerHorizontal="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Album"
         android:textSize="@dimen/player_album_text_size"
         android:layout_below="@id/player_artist_name"/>
 
@@ -29,15 +29,15 @@
         android:layout_marginTop="@dimen/player_margin"
         android:layout_width="@dimen/player_album_size"
         android:layout_height="@dimen/player_album_size"
-        android:src="@drawable/ic_mic_black_48dp"
+        android:src="@drawable/vinyl"
         android:contentDescription="@string/empty_image"
         android:layout_below="@id/player_album_name"/>
 
     <TextView
         android:id="@+id/player_track_name"
+        android:singleLine="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Track name"
         android:textSize="@dimen/player_text_size"
         android:layout_below="@id/player_image_view"
         android:layout_centerHorizontal="true"

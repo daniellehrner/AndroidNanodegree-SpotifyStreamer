@@ -10,8 +10,8 @@ import com.bumptech.glide.Glide;
 
 public class TopTracks extends AppCompatActivity {
     private static final String FRAGMENT = "me.lehrner.spotifystreamer.TopTracksFragment";
-    public final static String KEY_ARTIST_NAME = "me.lehrner.spotifystreamer.topTracks.ARTISTNAME";
-    public final static String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.topTracks.ARTISTID";
+    private final static String KEY_ARTIST_NAME = "me.lehrner.spotifystreamer.topTracks.ARTISTNAME";
+    private final static String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.topTracks.ARTISTID";
 
     private TopTracksFragment mFragment;
     private String mArtistName;
@@ -76,40 +76,5 @@ public class TopTracks extends AppCompatActivity {
     public void onTrimMemory(int level) {
         super.onTrimMemory(level);
         Glide.get(this).trimMemory(level);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        Log.d("TopTracks.onPause", "Start");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        Log.d("TopTracks.onResume", "Start");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        Log.d("TopTracks.onDestroy", "Start");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        Log.d("TopTracks.onStop", "Start");
-    }
-
-    @Override
-    public void onRestoreInstanceState (Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-
-        Log.d("TopTracks.RestoreInstan", "Start: " + savedInstanceState.toString());
     }
 }

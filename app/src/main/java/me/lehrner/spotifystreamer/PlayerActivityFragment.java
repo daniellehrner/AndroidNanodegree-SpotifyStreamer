@@ -13,7 +13,6 @@ import com.bumptech.glide.Glide;
 
 public class PlayerActivityFragment extends Fragment {
     private PlayerActivity mActivity;
-    private View mRootView;
     private TextView mArtistNameView, mAlbumNameView, mTrackNameView;
     private ImageView mPlayerImage;
 
@@ -23,7 +22,7 @@ public class PlayerActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        mRootView = inflater.inflate(R.layout.fragment_player, container, false);
+        View mRootView = inflater.inflate(R.layout.fragment_player, container, false);
 
         mArtistNameView = (TextView) mRootView.findViewById(R.id.player_artist_name);
         mAlbumNameView = (TextView) mRootView.findViewById(R.id.player_album_name);
@@ -48,13 +47,13 @@ public class PlayerActivityFragment extends Fragment {
         if (!albumImageUrl.isEmpty()) {
             Glide.with(this)
                     .load(albumImageUrl)
-                    .placeholder(R.drawable.ic_mic_black_48dp)
+                    .placeholder(R.drawable.vinyl)
                     .into(mPlayerImage);
 
             mPlayerImage.setContentDescription(getString(R.string.image_of_artist) + albumName);
         }
         else {
-            mPlayerImage.setImageResource(R.drawable.ic_mic_black_48dp);
+            mPlayerImage.setImageResource(R.drawable.vinyl);
             mPlayerImage.setContentDescription(getString(R.string.empty_image));
         }
 
