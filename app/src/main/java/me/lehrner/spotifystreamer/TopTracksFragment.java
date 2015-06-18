@@ -23,11 +23,9 @@ public class TopTracksFragment extends Fragment {
     private static final String KEY_LIST_VIEW = "me.lehrner.spotifystreamer.track.listview";
     private final static String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.track.artistId";
 
-    public final static String ARTIST_NAME = "me.lehrner.spotifystreamer.ARTISTNAME";
-    public final static String ALBUM_NAME = "me.lehrner.spotifystreamer.ALBUMNAME";
-    public final static String TRACK_NAME = "me.lehrner.spotifystreamer.TRACKNAME";
-    public final static String TRACK_URL = "me.lehrner.spotifystreamer.TRACKURL";
-    public final static String ALBUM_IMAGE = "me.lehrner.spotifystreamer.ALBUMIMAGE";
+    public final static String ARRAY_ID = "me.lehrner.spotifystreamer.ARRAY_ID";
+    public final static String ARTIST_NAME = "me.lehrner.spotifystreamer.ARTIST_NAME";
+    public final static String TRACK_ARRAY = "me.lehrner.spotifystreamer.TRACK_ARRAY";
 
     private ListView mListView;
     private ArrayList<SpotifyTrackSearchResult> mTracks;
@@ -78,12 +76,17 @@ public class TopTracksFragment extends Fragment {
             public void onItemClick(AdapterView<?> adapter, View v, int position, long rowId) {
                 SpotifyTrackSearchResult clickedItem = (SpotifyTrackSearchResult) adapter.getItemAtPosition(position);
 
+                int arrayPos = mTracks.indexOf(clickedItem);
+
+                if (arrayPos == -1) {
+                    Log.e("TopTracks.click", "clicked item not found: " + clickedItem.toString());
+                    mActivity.finish();
+                }
+
                 Intent playerIntent = new Intent(mContext, PlayerActivity.class);
                 playerIntent.putExtra(ARTIST_NAME, mActivity.getArtistName());
-                playerIntent.putExtra(ALBUM_NAME, clickedItem.getAlbumName());
-                playerIntent.putExtra(TRACK_NAME, clickedItem.getTrackName());
-                playerIntent.putExtra(TRACK_URL, clickedItem.getTrackUrl());
-                playerIntent.putExtra(ALBUM_IMAGE, clickedItem.getImageUrlBig());
+                playerIntent.putExtra(ARRAY_ID, arrayPos);
+                playerIntent.putParcelableArrayListExtra(TRACK_ARRAY, mTracks);
                 startActivity(playerIntent);
             }
         });
@@ -111,6 +114,10 @@ public class TopTracksFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mActivity = (TopTracks) activity;
+    }
+
+    public SpotifyTrackSearchResult getTrack (int position) {
+        return mTracks.get(position);
     }
 
     public void showToast(String message) {

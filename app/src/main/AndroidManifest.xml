@@ -48,6 +48,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="me.lehrner.spotifystreamer.TopTracks" />
         </activity>
+
+        <service
+            android:name=".MediaPlayerService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

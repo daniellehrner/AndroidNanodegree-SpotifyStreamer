@@ -8,12 +8,54 @@
 
     <ImageView
         android:id="@+id/player_image_view"
-        android:layout_width="@dimen/player_album_size"
-        android:layout_height="@dimen/player_album_size"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
         android:src="@drawable/vinyl"
         android:contentDescription="@string/empty_image"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_above="@+id/player_time_progress"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginEnd="@dimen/activity_horizontal_margin"/>
+
+    <RelativeLayout
+        android:id="@+id/player_button_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/player_time_progress"
+        android:layout_toRightOf="@id/player_image_view"
+        android:layout_toEndOf="@id/player_image_view">
+
+        <ImageButton
+            android:id="@+id/player_image_previous"
+            android:layout_width="@dimen/player_button_size"
+            android:layout_height="@dimen/player_button_size"
+            android:src="@drawable/ic_skip_previous_black_48dp"
+            android:contentDescription="@string/empty_image"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:onClick="buttonPrevNext" />
+
+        <ImageButton
+            android:id="@+id/player_image_play"
+            android:layout_width="@dimen/player_button_size"
+            android:layout_height="@dimen/player_button_size"
+            android:src="@drawable/ic_play_arrow_black_48dp"
+            android:contentDescription="@string/empty_image"
+            android:layout_centerInParent="true"
+            android:onClick="buttonPlay" />
+
+        <ImageButton
+            android:id="@+id/player_image_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_skip_next_black_48dp"
+            android:contentDescription="@string/empty_image"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:onClick="buttonPrevNext" />
+
+    </RelativeLayout>
 
     <TextView
         android:id="@+id/player_artist_name"
@@ -21,16 +63,16 @@
         android:layout_height="wrap_content"
         android:textSize="@dimen/player_text_size"
         android:layout_alignTop="@id/player_image_view"
-        android:layout_alignLeft="@id/player_image_previous"
-        android:layout_alignStart="@id/player_image_previous" />
+        android:layout_alignLeft="@id/player_button_layout"
+        android:layout_alignStart="@id/player_button_layout" />
 
     <TextView
         android:id="@+id/player_album_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="@dimen/player_album_text_size"
-        android:layout_alignLeft="@id/player_image_previous"
-        android:layout_alignStart="@id/player_image_previous"
+        android:layout_alignLeft="@id/player_button_layout"
+        android:layout_alignStart="@id/player_button_layout"
         android:layout_below="@id/player_artist_name" />
 
     <TextView
@@ -38,8 +80,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="@dimen/player_text_size"
-        android:layout_alignLeft="@id/player_image_previous"
-        android:layout_alignStart="@id/player_image_previous"
+        android:layout_alignLeft="@id/player_button_layout"
+        android:layout_alignStart="@id/player_button_layout"
         android:layout_below="@id/player_album_name"/>
 
     <TextView
@@ -67,35 +109,5 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/player_time_start" />
-
-    <ImageButton
-        android:id="@+id/player_image_next"
-        android:layout_width="@dimen/player_button_size"
-        android:layout_height="@dimen/player_button_size"
-        android:src="@drawable/ic_skip_next_black_48dp"
-        android:contentDescription="@string/empty_image"
-        android:layout_above="@id/player_time_progress"
-        android:layout_alignRight="@id/player_time_progress"
-        android:layout_alignEnd="@id/player_time_progress" />
-
-    <ImageButton
-        android:id="@+id/player_image_play"
-        android:layout_width="@dimen/player_button_size"
-        android:layout_height="@dimen/player_button_size"
-        android:src="@drawable/ic_play_arrow_black_48dp"
-        android:contentDescription="@string/empty_image"
-        android:layout_above="@id/player_time_progress"
-        android:layout_toLeftOf="@id/player_image_next"
-        android:layout_toStartOf="@id/player_image_next" />
-
-    <ImageButton
-        android:id="@+id/player_image_previous"
-        android:layout_width="@dimen/player_button_size"
-        android:layout_height="@dimen/player_button_size"
-        android:src="@drawable/ic_skip_previous_black_48dp"
-        android:contentDescription="@string/empty_image"
-        android:layout_above="@id/player_time_progress"
-        android:layout_toLeftOf="@id/player_image_play"
-        android:layout_toStartOf="@id/player_image_play" />
 
 </RelativeLayout>
