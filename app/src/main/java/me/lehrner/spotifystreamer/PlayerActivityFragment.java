@@ -45,8 +45,8 @@ public class PlayerActivityFragment extends Fragment {
     private Intent mPlayerServiceIntent;
     private View mRootView;
     private boolean mBound = false, mPlayAfterConnected = false;
-    private String mArtistName, mTag;
-    private int mTrackDuration = 0, mcurrentPosition = 0, mLastCurrentPosition = 0, mLastTrackDuration = 0;
+    private String mArtistName;
+    private int mTrackDuration = 0, mCurrentPosition = 0, mLastCurrentPosition = 0, mLastTrackDuration = 0;
     private SeekBar mSeekBar;
     private Timer mTimer;
     private TimerTask mUpdateTrackStatus;
@@ -94,8 +94,8 @@ public class PlayerActivityFragment extends Fragment {
             mPlayerTimeEndView.setText(timeIntToString(mTrackDuration));
             mSeekBar.setMax(mTrackDuration);
 
-            mcurrentPosition = savedInstanceState.getInt(KEY_CURRENT_POSITION);
-            mPlayerTimeStartView.setText(timeIntToString(mcurrentPosition));
+            mCurrentPosition = savedInstanceState.getInt(KEY_CURRENT_POSITION);
+            mPlayerTimeStartView.setText(timeIntToString(mCurrentPosition));
 
         }
         else {
@@ -134,63 +134,79 @@ public class PlayerActivityFragment extends Fragment {
         mUpdateTrackStatus.cancel();
     }
 
-     private int convertProgress(int time) {
-         int result = 0;
-
-         if (mTrackDuration > 0) {
-             result = time * 100 / mTrackDuration;
-         }
-
-         return result;
-     }
-
     private void createTimerTask() {
         mUpdateTrackStatus = new TimerTask() {
             public void run() {
-                if (mPlayerService != null) {
-                    if (mPlayerService.getState().equals(MediaPlayerService.STATE_STARTED) ||
-                            mPlayerService.getState().equals(MediaPlayerService.STATE_PAUSE) ) {
+                if (!mBound) {
+                    return;
+                }
 
-                        int duration = mPlayerService.getDuration();
-                        if (duration > 0) {
-                            mTrackDuration = duration;
-                        }
-                        else {
-                            mTrackDuration = 0;
-                        }
+                if (mPlayerService.isIdle()) {
+                    mPlayButton.setClickable(false);
+                    return;
+                }
+                else {
+                    mPlayButton.setClickable(true);
+                }
 
-                        if (mLastTrackDuration != mTrackDuration) {
+                if (!mPlayerService.isCompleted()) {
+                    int duration = mPlayerService.getDuration();
 
-                            mActivity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mPlayerTimeEndView.setText(timeIntToString(mTrackDuration));
-//                                    mSeekBar.setMax(mTrackDuration);
-//                                    mSeekBar.setProgress(0);
-                                }
-                            });
+//                    Log.d("Timer", "duration: " + duration + ", mTrackDuration: " + mTrackDuration);
 
-                            mLastTrackDuration = mTrackDuration;
-                            Log.d("Player.Timer", "Setting duration to :" + mTrackDuration);
-                        }
+                    mTrackDuration = (duration > 0) ? duration : 0;
 
-                        mcurrentPosition = mPlayerService.getCurrentPosition();
-
-                        // only update time if it has changed
-                        if (mLastCurrentPosition != mcurrentPosition) {
-
-                            mActivity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mPlayerTimeStartView.setText(timeIntToString(mcurrentPosition));
-                                    mSeekBar.setProgress(convertProgress(mTrackDuration));
-                                }
-                            });
-
-                            mLastCurrentPosition = mcurrentPosition;
-//                            Log.d("Player.Timer", "Setting current position to :" + mcurrentPosition);
-                        }
+                    if (mTrackDuration == 0) {
+                        mActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mPlayerTimeEndView.setText("");
+                            }
+                        });
                     }
+                    else if (mLastTrackDuration != mTrackDuration) {
+
+                        mActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mPlayerTimeEndView.setText(timeIntToString(mTrackDuration));
+                                mSeekBar.setMax(mTrackDuration);
+                            }
+                        });
+
+                        mLastTrackDuration = mTrackDuration;
+                        Log.d("Player.Timer", "Setting duration to: " + mTrackDuration);
+                    }
+
+                    mCurrentPosition = mPlayerService.getCurrentPosition();
+
+                    // only update time if it has changed
+                    if (mLastCurrentPosition != mCurrentPosition) {
+
+                        mActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                //Log.d("Timer", "max: " + mSeekBar.getMax() + ", progress: " + mTrackDuration);
+
+                                mPlayerTimeStartView.setText(timeIntToString(mCurrentPosition));
+                                mSeekBar.setProgress(mCurrentPosition);
+                            }
+                        });
+
+                        mLastCurrentPosition = mCurrentPosition;
+//                            Log.d("Player.Timer", "Setting current position to :" + mCurrentPosition);
+                    }
+
+                }
+                else {
+//                    if (mBound && mPlayerService.isCompleted()) {
+                        mActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                changePlayButton(TAG_PLAY);
+                            }
+                        });
+//                    }
                 }
             }
         };
@@ -254,9 +270,11 @@ public class PlayerActivityFragment extends Fragment {
         else {
             mPlayAfterConnected = true;
         }
-        changePlayButton(TAG_PLAY);
+        changePlayButton(TAG_PAUSE);
         mPlayerTimeStartView.setText("0:00");
         mPlayerTimeEndView.setText("");
+        mTrackDuration = mLastCurrentPosition = mCurrentPosition = mLastTrackDuration = 0;
+        mSeekBar.setProgress(mCurrentPosition);
     }
 
     public void playPauseTrack() {
@@ -264,24 +282,24 @@ public class PlayerActivityFragment extends Fragment {
 
         switch (buttonTag) {
             case TAG_PLAY:
-                mPlayerServiceIntent.setAction(MediaPlayerService.ACTION_PAUSE);
+                Log.d("playPauseTrack", "Button play");
+                playTrack(mTrack.getTrackUrl());
                 changePlayButton(TAG_PAUSE);
                 break;
             case TAG_PAUSE:
+                Log.d("playPauseTrack", "Button pause");
+                mPlayerService.pause();
                 changePlayButton(TAG_PLAY);
-                playTrack(mTrack.getTrackUrl());
                 break;
             default:
                 Log.e("switchPlayButtonSymbol", "Invalid button tag: " + buttonTag);
                 mActivity.finish();
         }
-
-
     }
 
     private void playTrack(String trackUrl) {
             if (!mPlayerService.isPlaying()) {
-            changePlayButton(TAG_PLAY);
+            changePlayButton(TAG_PAUSE);
         }
 
         Log.d("playTrack", "Starting track " + trackUrl);
@@ -296,6 +314,10 @@ public class PlayerActivityFragment extends Fragment {
     private void changePlayButton(String tag) {
         String buttonTag = (String) mPlayButton.getTag();
 
+        if (tag.equals(buttonTag)) {
+            return;
+        }
+
         switch (tag) {
             case TAG_PLAY:
                 mPlayButton.setImageResource(R.drawable.ic_play_arrow_black_48dp);
@@ -309,8 +331,6 @@ public class PlayerActivityFragment extends Fragment {
                 Log.e("switchPlayButtonSymbol", "Invalid button tag: " + buttonTag);
                 mActivity.finish();
         }
-
-        mTag = tag;
     }
 
     @Override
@@ -339,9 +359,7 @@ public class PlayerActivityFragment extends Fragment {
 
         outState.putParcelable(KEY_TRACK, mTrack);
         outState.putString(KEY_ARTIST, mArtistName);
-        outState.putString(KEY_TAG, mTag);
         outState.putInt(KEY_DURATION, mTrackDuration);
-        outState.putInt(KEY_CURRENT_POSITION, mcurrentPosition);
+        outState.putInt(KEY_CURRENT_POSITION, mCurrentPosition);
     }
-
 }

@@ -103,7 +103,6 @@
         android:layout_alignParentBottom="true"/>
 
     <SeekBar android:id="@id/player_time_progress"
-        style="?android:attr/progressBarStyleHorizontal"
         android:indeterminate="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

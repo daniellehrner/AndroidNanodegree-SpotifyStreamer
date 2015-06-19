@@ -32,7 +32,7 @@ public class PlayerActivity extends AppCompatActivity {
             if (mArrayId == 0) {
                 mArrayId = trackArraySize - 1;
             }
-            else if (mArrayId > 0 && mArrayId <= (trackArraySize - 1)) {
+            else {
                 mArrayId--;
             }
 
@@ -43,7 +43,7 @@ public class PlayerActivity extends AppCompatActivity {
             if (mArrayId == trackArraySize -1) {
                 mArrayId = 0;
             }
-            else if (mArrayId >= 0 && mArrayId < (trackArraySize - 2)) {
+            else {
                 mArrayId++;
             }
         }
@@ -56,6 +56,7 @@ public class PlayerActivity extends AppCompatActivity {
         return mTracks.get(mArrayId);
     }
 
+    @SuppressWarnings("unused")
     public void buttonPrevNext (View view) {
         int direction;
 
@@ -75,6 +76,7 @@ public class PlayerActivity extends AppCompatActivity {
         mFragment.setTrack(mArtistName, getTrack(direction));
     }
 
+    @SuppressWarnings("unused")
     public void buttonPlay (View view) {
         mFragment.playPauseTrack();
     }

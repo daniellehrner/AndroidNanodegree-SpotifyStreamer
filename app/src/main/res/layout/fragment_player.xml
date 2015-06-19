@@ -55,8 +55,8 @@
 
     <ImageButton
         android:id="@+id/player_image_previous"
-        android:layout_width="@dimens/player_button_size"
-        android:layout_height="@dimens/player_button_size"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
         android:src="@drawable/ic_skip_previous_black_48dp"
         android:contentDescription="@string/empty_image"
         android:layout_alignParentBottom="true"
@@ -66,8 +66,8 @@
 
     <ImageButton
         android:id="@+id/player_image_play"
-        android:layout_width="@dimens/player_button_size"
-        android:layout_height="@dimens/player_button_size"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
         android:src="@drawable/ic_play_arrow_black_48dp"
         android:contentDescription="@string/empty_image"
         android:layout_alignParentBottom="true"
@@ -76,8 +76,8 @@
 
     <ImageButton
         android:id="@+id/player_image_next"
-        android:layout_width="@dimens/player_button_size"
-        android:layout_height="@dimens/player_button_size"
+        android:layout_width="@dimen/player_button_size"
+        android:layout_height="@dimen/player_button_size"
         android:src="@drawable/ic_skip_next_black_48dp"
         android:contentDescription="@string/empty_image"
         android:layout_alignParentRight="true"
@@ -102,7 +102,6 @@
         android:layout_alignParentEnd="true" />
 
     <SeekBar android:id="@+id/player_time_progress"
-        style="?android:attr/progressBarStyleHorizontal"
         android:indeterminate="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
