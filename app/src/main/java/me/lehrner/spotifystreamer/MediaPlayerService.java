@@ -5,24 +5,39 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 
+import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-public class MediaPlayerService extends Service implements MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener {
+public class MediaPlayerService extends Service implements  MediaPlayer.OnPreparedListener,
+                                                            MediaPlayer.OnErrorListener,
+                                                            MediaPlayer.OnCompletionListener {
     public static final String ACTION_PLAY = "me.lehrner.spotifystreamer.PLAY";
     public static final String ACTION_PAUSE = "me.lehrner.spotifystreamer.PAUSE";
+    public static final String ACTION_START = "me.lehrner.spotifystreamer.START";
     public static final String KEY_TRACK_URL = "me.lehrner.spotifystreamer.track.url";
-    private static final String STATE_IDLE = "idle";
-    private static final String STATE_STARTED = "started";
-    private static final String STATE_PAUSE = "pause";
+    public static final String STATE_IDLE = "idle";
+    public static final String STATE_STARTED = "started";
+    public static final String STATE_PAUSE = "pause";
 
     private MediaPlayer mMediaPlayer = null;
     private String mPLayerState = STATE_IDLE;
+    private final IBinder mBinder = new MediaPlayerBinder();
+
+    public class MediaPlayerBinder extends Binder {
+         MediaPlayerService getService() {
+            return MediaPlayerService.this;
+        }
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBinder;
+    }
 
     public MediaPlayerService() {
         initMediaPlayer();
     }
-
 
     private void initMediaPlayer() {
         mMediaPlayer = new MediaPlayer();
@@ -30,10 +45,23 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
 
         mMediaPlayer.setOnPreparedListener(this);
         mMediaPlayer.setOnErrorListener(this);
+        mMediaPlayer.setOnCompletionListener(this);
     }
 
     public boolean isPlaying() {
-        return mMediaPlayer.isPlaying();
+        return (mMediaPlayer != null) && mMediaPlayer.isPlaying();
+    }
+
+    public String getState() {
+        return mPLayerState;
+    }
+
+    public int getDuration() {
+        return (mMediaPlayer != null) ? mMediaPlayer.getDuration() : 0;
+    }
+
+    public int getCurrentPosition() {
+        return (mMediaPlayer != null) ? mMediaPlayer.getCurrentPosition() : 0;
     }
 
     private void setDataSource(String url) {
@@ -103,11 +131,14 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
                 mMediaPlayer.pause();
                 mPLayerState = STATE_PAUSE;
                 break;
+            case ACTION_START:
+                Log.d("Service.onStartCommand", "Service started");
+                break;
             default:
                 Log.e("Service.onStartCommand", "Invalid action: " + intent.getAction());
         }
 
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     // Called when MediaPlayer is ready
@@ -121,11 +152,16 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
     public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
         Log.e("Service.onError", "What: " + what + ", extra: " + extra);
         mediaPlayer.release();
+        //noinspection UnusedAssignment
         mediaPlayer = null;
 
         initMediaPlayer();
 
         return true;
+    }
+
+    public void onCompletion(MediaPlayer mediaPlayer) {
+        stopSelf();
     }
 
     @Override
@@ -137,10 +173,4 @@ public class MediaPlayerService extends Service implements MediaPlayer.OnPrepare
             mMediaPlayer = null;
         }
     }
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
-    }
-
 }

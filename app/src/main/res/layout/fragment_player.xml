@@ -6,6 +6,15 @@
     android:padding="@dimen/activity_horizontal_margin"
     tools:context="me.lehrner.spotifystreamer.PlayerActivityFragment">
 
+  <!--  <Switch
+        android:id="@+id/player_toggle_autoplay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textOn="Autoplay"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true" />-->
+
     <TextView
         android:id="@+id/player_artist_name"
         android:singleLine="true"
@@ -46,8 +55,8 @@
 
     <ImageButton
         android:id="@+id/player_image_previous"
-        android:layout_width="@dimen/player_button_size"
-        android:layout_height="@dimen/player_button_size"
+        android:layout_width="@dimens/player_button_size"
+        android:layout_height="@dimens/player_button_size"
         android:src="@drawable/ic_skip_previous_black_48dp"
         android:contentDescription="@string/empty_image"
         android:layout_alignParentBottom="true"
@@ -57,8 +66,8 @@
 
     <ImageButton
         android:id="@+id/player_image_play"
-        android:layout_width="@dimen/player_button_size"
-        android:layout_height="@dimen/player_button_size"
+        android:layout_width="@dimens/player_button_size"
+        android:layout_height="@dimens/player_button_size"
         android:src="@drawable/ic_play_arrow_black_48dp"
         android:contentDescription="@string/empty_image"
         android:layout_alignParentBottom="true"
@@ -67,8 +76,8 @@
 
     <ImageButton
         android:id="@+id/player_image_next"
-        android:layout_width="@dimen/player_button_size"
-        android:layout_height="@dimen/player_button_size"
+        android:layout_width="@dimens/player_button_size"
+        android:layout_height="@dimens/player_button_size"
         android:src="@drawable/ic_skip_next_black_48dp"
         android:contentDescription="@string/empty_image"
         android:layout_alignParentRight="true"
@@ -80,7 +89,6 @@
         android:id="@+id/player_time_start"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0:00"
         android:textSize="@dimen/player_text_size"
         android:layout_above="@id/player_image_previous"/>
 
@@ -88,7 +96,6 @@
         android:id="@+id/player_time_end"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="0:30"
         android:textSize="@dimen/player_text_size"
         android:layout_above="@id/player_image_next"
         android:layout_alignParentRight="true"
@@ -96,6 +103,7 @@
 
     <SeekBar android:id="@+id/player_time_progress"
         style="?android:attr/progressBarStyleHorizontal"
+        android:indeterminate="false"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/player_time_start" />

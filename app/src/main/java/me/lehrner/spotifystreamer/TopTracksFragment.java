@@ -116,10 +116,6 @@ public class TopTracksFragment extends Fragment {
         mActivity = (TopTracks) activity;
     }
 
-    public SpotifyTrackSearchResult getTrack (int position) {
-        return mTracks.get(position);
-    }
-
     public void showToast(String message) {
         toast.setText(message);
         toast.show();

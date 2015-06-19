@@ -12,23 +12,20 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 
 public class PlayerActivity extends AppCompatActivity {
+    private static final String FRAGMENT = "me.lehrner.spotifystreamer.PlayerActivityFragment";
     private static final int TRACK_PREVIOUS = 0;
     private static final int TRACK_NEXT = 1;
+
+    private static final String KEY_TRACKS = "me.lehrner.spotifystreamer.tracks";
+    private static final String KEY_ARTIST = "me.lehrner.spotifystreamer.artist";
+    private static final String KEY_ARRAY_ID = "me.lehrner.spotifystreamer.tag";
 
     private String mArtistName;
     private int mArrayId;
     private ArrayList<SpotifyTrackSearchResult> mTracks;
     private PlayerActivityFragment mFragment;
 
-    public String getArtistName() {
-        return mArtistName;
-    }
-
-    public SpotifyTrackSearchResult getTrack() {
-        return mTracks.get(mArrayId);
-    }
-
-    public SpotifyTrackSearchResult getTrack(int direction) {
+    private SpotifyTrackSearchResult getTrack(int direction) {
         int trackArraySize = mTracks.size();
 
         if (direction == TRACK_PREVIOUS) {
@@ -82,12 +79,30 @@ public class PlayerActivity extends AppCompatActivity {
         mFragment.playPauseTrack();
     }
 
+    public String getArtistName() {
+        return  mArtistName;
+    }
+
+    public SpotifyTrackSearchResult getTrack() {
+        return mTracks.get(mArrayId);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        handleIntent(getIntent());
+        if (savedInstanceState != null) {
+            //Restore the fragment's instance
+            mFragment = (PlayerActivityFragment) getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT);
+            mTracks = savedInstanceState.getParcelableArrayList(KEY_TRACKS);
+            mArrayId = savedInstanceState.getInt(KEY_ARRAY_ID);
+            mArtistName = savedInstanceState.getString(KEY_ARTIST);
+        }
+        else {
+//            mFragment = (PlayerActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_tracks);
+            handleIntent(getIntent());
+        }
     }
 
     private void handleIntent(Intent intent) {
@@ -113,7 +128,7 @@ public class PlayerActivity extends AppCompatActivity {
             finish();
         }
 
-        mFragment.setTrack(mArtistName, mTracks.get(mArrayId));
+//        mFragment.setTrack(mArtistName, mTracks.get(mArrayId));
     }
 
     @Override
@@ -125,5 +140,17 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     public void onAttachFragment (Fragment fragment) {
         mFragment = (PlayerActivityFragment) fragment;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        Log.d("TopTracks.saveInstance", "Start");
+        super.onSaveInstanceState(outState);
+
+        //Save the fragment's instance
+        getSupportFragmentManager().putFragment(outState, FRAGMENT, mFragment);
+        outState.putParcelableArrayList(KEY_TRACKS, mTracks);
+        outState.putString(KEY_ARTIST, mArtistName);
+        outState.putInt(KEY_ARRAY_ID, mArrayId);
     }
 }
