@@ -63,8 +63,7 @@ public class TopTracksFragment extends Fragment {
 
         mTrackAdapter =
                 new TrackAdapter(
-                        mContext, // The current context (this activity)
-                        R.layout.top_tracks_item_layout, // The name of the layout ID.
+                        mContext,
                         new ArrayList<SpotifyTrackSearchResult>());
 
         mListView = (ListView) mRootView.findViewById(R.id.listview_track_search_result);

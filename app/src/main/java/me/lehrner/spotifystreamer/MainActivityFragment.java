@@ -63,8 +63,7 @@ public class MainActivityFragment extends Fragment {
         mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
         mAdapter = new ArtistAdapter(
-                        mContext, // The current context (this activity)
-                        R.layout.artist_item_layout, // The name of the layout ID.
+                        mContext,
                         new ArrayList<SpotifyArtistSearchResult>());
 
         mListView.setAdapter(mAdapter);

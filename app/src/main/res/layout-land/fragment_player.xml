@@ -23,15 +23,15 @@
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/player_time_progress"
-        android:layout_toRightOf="@id/player_image_view"
-        android:layout_toEndOf="@id/player_image_view">
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true">
 
         <ImageButton
             android:id="@+id/player_image_previous"
             android:layout_width="@dimen/player_button_size"
             android:layout_height="@dimen/player_button_size"
             android:src="@drawable/ic_skip_previous_black_48dp"
-            android:contentDescription="@string/empty_image"
+            android:contentDescription="@string/button_previous"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:onClick="buttonPrevNext" />
@@ -41,7 +41,7 @@
             android:layout_width="@dimen/player_button_size"
             android:layout_height="@dimen/player_button_size"
             android:src="@drawable/ic_play_arrow_black_48dp"
-            android:contentDescription="@string/empty_image"
+            android:contentDescription="@string/button_play"
             android:layout_centerInParent="true"
             android:onClick="buttonPlay" />
 
@@ -50,7 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_skip_next_black_48dp"
-            android:contentDescription="@string/empty_image"
+            android:contentDescription="@string/button_next"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:onClick="buttonPrevNext" />
@@ -100,7 +100,9 @@
         android:textSize="@dimen/player_text_size"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"/>
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@id/player_time_start"
+        android:layout_toEndOf="@id/player_time_start"/>
 
     <SeekBar android:id="@id/player_time_progress"
         android:indeterminate="false"

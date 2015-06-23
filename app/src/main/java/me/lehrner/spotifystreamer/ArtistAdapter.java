@@ -18,11 +18,11 @@ class ArtistAdapter extends ArrayAdapter<SpotifyArtistSearchResult> {
     private final Context mContext;
     private final int mLayoutId;
 
-    public ArtistAdapter(Context context, int LayoutId, List<SpotifyArtistSearchResult> artistList) {
-        super(context,LayoutId, artistList);
+    public ArtistAdapter(Context context, List<SpotifyArtistSearchResult> artistList) {
+        super(context, R.layout.artist_item_layout, artistList);
         mArtistList = artistList;
         mContext = context;
-        mLayoutId = LayoutId;
+        mLayoutId = R.layout.artist_item_layout;
     }
 
     @Override

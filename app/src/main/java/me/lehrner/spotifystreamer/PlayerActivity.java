@@ -13,8 +13,6 @@ import java.util.ArrayList;
 
 public class PlayerActivity extends AppCompatActivity {
     private static final String FRAGMENT = "me.lehrner.spotifystreamer.PlayerActivityFragment";
-    private static final int TRACK_PREVIOUS = 0;
-    private static final int TRACK_NEXT = 1;
 
     private static final String KEY_TRACKS = "me.lehrner.spotifystreamer.tracks";
     private static final String KEY_ARTIST = "me.lehrner.spotifystreamer.artist";
@@ -25,68 +23,37 @@ public class PlayerActivity extends AppCompatActivity {
     private ArrayList<SpotifyTrackSearchResult> mTracks;
     private PlayerActivityFragment mFragment;
 
-    private SpotifyTrackSearchResult getTrack(int direction) {
-        int trackArraySize = mTracks.size();
-
-        if (direction == TRACK_PREVIOUS) {
-            if (mArrayId == 0) {
-                mArrayId = trackArraySize - 1;
-            }
-            else {
-                mArrayId--;
-            }
-
-        }
-        else if (direction == TRACK_NEXT) {
-
-
-            if (mArrayId == trackArraySize -1) {
-                mArrayId = 0;
-            }
-            else {
-                mArrayId++;
-            }
-        }
-        else {
-            Log.e("getTrack", "Invalid direction: " + direction);
-            finish();
-        }
-
-        Log.d("Player.getTrack", "Return track with id " + mArrayId);
-        return mTracks.get(mArrayId);
-    }
-
     @SuppressWarnings("unused")
     public void buttonPrevNext (View view) {
-        int direction;
-
         switch (view.getId()) {
             case R.id.player_image_next:
                 Log.d("buttonPrevNext", "Button next");
-                direction = TRACK_NEXT;
+                mFragment.next();
                 break;
             case R.id.player_image_previous:
                 Log.d("buttonPrevNext", "Button previous");
-                direction = TRACK_PREVIOUS;
+                mFragment.previous();
                 break;
             default:
-                return;
+                Log.e("buttonPrevNext", "Invalid id: " + view.getId());
         }
-
-        mFragment.setTrack(mArtistName, getTrack(direction));
     }
 
     @SuppressWarnings("unused")
     public void buttonPlay (View view) {
-        mFragment.playPauseTrack();
+        mFragment.playPauseTrack((String) view.getTag());
     }
 
     public String getArtistName() {
         return  mArtistName;
     }
 
-    public SpotifyTrackSearchResult getTrack() {
-        return mTracks.get(mArrayId);
+    public ArrayList<SpotifyTrackSearchResult> getTracks() {
+        return mTracks;
+    }
+
+    public int getTrackId() {
+        return mArrayId;
     }
 
     @Override
@@ -102,7 +69,6 @@ public class PlayerActivity extends AppCompatActivity {
             mArtistName = savedInstanceState.getString(KEY_ARTIST);
         }
         else {
-//            mFragment = (PlayerActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_tracks);
             handleIntent(getIntent());
         }
     }
@@ -129,8 +95,6 @@ public class PlayerActivity extends AppCompatActivity {
             Log.e("Player.handleIntent", e.getMessage());
             finish();
         }
-
-//        mFragment.setTrack(mArtistName, mTracks.get(mArrayId));
     }
 
     @Override

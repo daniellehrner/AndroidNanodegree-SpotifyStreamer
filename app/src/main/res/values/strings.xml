@@ -10,5 +10,9 @@
     <string name="no_track_found">No tracks available</string>
     <string name="title_activity_top_tracks">Top Tracks</string>
     <string name="same_artist">Search not changed</string>
+    <string name="button_play">Play button</string>
+    <string name="button_pause">Pause button</string>
+    <string name="button_previous">Previous button</string>
+    <string name="button_next">Next button</string>
 
 </resources>

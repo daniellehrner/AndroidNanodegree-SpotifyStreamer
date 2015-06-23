@@ -20,6 +20,7 @@ class SpotifyTrackSearchResult implements Parcelable {
     public SpotifyTrackSearchResult(String trackName, String trackUrl,
                                     String albumName, String imageUrlMedium,
                                     String imageUrlBig) {
+
         this.trackName = trackName;
         this.trackUrl = trackUrl;
         this.albumName = albumName;
@@ -52,6 +53,7 @@ class SpotifyTrackSearchResult implements Parcelable {
         return "TrackName: " + trackName +
                 ", TrackUrl: " + trackUrl +
                 ", AlbumName: " + albumName +
+                ", ImageUrlMedium: " + imageUrlMedium +
                 ", ImageUrlBig: " + imageUrlBig;
     }
 

@@ -19,17 +19,19 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 
 public class PlayerActivityFragment extends Fragment {
-    private static final String KEY_TRACK = "me.lehrner.spotifystreamer.tracks";
+    private static final String KEY_TRACKS = "me.lehrner.spotifystreamer.tracks";
     private static final String KEY_ARTIST = "me.lehrner.spotifystreamer.artist";
     private static final String KEY_TAG = "me.lehrner.spotifystreamer.tag";
     private static final String KEY_DURATION = "me.lehrner.spotifystreamer.duration";
     private static final String KEY_CURRENT_POSITION = "me.lehrner.spotifystreamer.position";
+    private static final String KEY_TRACK_ID = "me.lehrner.spotifystreamer.track.id";
 
     private static final String TAG_PLAY = "play";
     private static final String TAG_PAUSE = "pause";
@@ -39,14 +41,15 @@ public class PlayerActivityFragment extends Fragment {
     private PlayerActivity mActivity;
     private TextView mArtistNameView, mAlbumNameView, mTrackNameView, mPlayerTimeStartView, mPlayerTimeEndView;
     private ImageView mPlayerImage;
-    private SpotifyTrackSearchResult mTrack;
+    private ArrayList<SpotifyTrackSearchResult> mTracks;
     private ImageButton mPlayButton;
     private MediaPlayerService mPlayerService;
     private Intent mPlayerServiceIntent;
     private View mRootView;
     private boolean mBound = false, mPlayAfterConnected = false;
     private String mArtistName;
-    private int mTrackDuration = 0, mCurrentPosition = 0, mLastCurrentPosition = 0, mLastTrackDuration = 0;
+    private int mTrackDuration = 0, mCurrentPosition = 0, mLastCurrentPosition = 0,
+            mLastTrackDuration = 0, mTrackId = 0;
     private SeekBar mSeekBar;
     private Timer mTimer;
     private TimerTask mUpdateTrackStatus;
@@ -81,14 +84,16 @@ public class PlayerActivityFragment extends Fragment {
         mPlayerTimeStartView = (TextView) mRootView.findViewById(R.id.player_time_start);
         mPlayerTimeEndView = (TextView) mRootView.findViewById(R.id.player_time_end);
         mSeekBar = (SeekBar) mRootView.findViewById(R.id.player_time_progress);
-        mSeekBar.setIndeterminate(false);
 
         mPlayerServiceIntent = new Intent(mActivity, MediaPlayerService.class);
 
+        boolean newTrack = false, autoStart = false;
+
         if (savedInstanceState != null) {
-            mTrack = savedInstanceState.getParcelable(KEY_TRACK);
+            mTracks = savedInstanceState.getParcelableArrayList(KEY_TRACKS);
             mArtistName = savedInstanceState.getString(KEY_ARTIST);
             changePlayButton(savedInstanceState.getString(KEY_TAG));
+            mTrackId = savedInstanceState.getInt(KEY_TRACK_ID);
 
             mTrackDuration = savedInstanceState.getInt(KEY_DURATION);
             mPlayerTimeEndView.setText(timeIntToString(mTrackDuration));
@@ -96,14 +101,29 @@ public class PlayerActivityFragment extends Fragment {
 
             mCurrentPosition = savedInstanceState.getInt(KEY_CURRENT_POSITION);
             mPlayerTimeStartView.setText(timeIntToString(mCurrentPosition));
-
         }
         else {
             mPlayerServiceIntent.setAction(MediaPlayerService.ACTION_START);
             mActivity.startService(mPlayerServiceIntent);
+            mTracks = mActivity.getTracks();
+            mArtistName = mActivity.getArtistName();
+            mTrackId = mActivity.getTrackId();
+
+            newTrack = true;
+            autoStart = true;
         }
 
-        setTrack();
+        setTrack(mTrackId, newTrack);
+
+        if (autoStart) {
+            if (mBound) {
+                playTrack(mTrackId);
+            }
+            // if service is not bound yet, set boolean to start track after connection is established
+            else {
+                mPlayAfterConnected = true;
+            }
+        }
     }
 
     @Override
@@ -123,8 +143,8 @@ public class PlayerActivityFragment extends Fragment {
     private void startTimer() {
         createTimerTask();
 
-        // periodically check progress and duration of track every
         mTimer = new Timer();
+        // periodically check progress and duration of track every 200 ms
         mTimer.scheduleAtFixedRate(mUpdateTrackStatus, DELAY, PERIOD);
     }
 
@@ -226,7 +246,7 @@ public class PlayerActivityFragment extends Fragment {
 
             if (mPlayAfterConnected) {
                 Log.d("onServiceConnected", "Play");
-                playTrack(mTrack.getTrackUrl());
+                playTrack(mTrackId);
                 mPlayAfterConnected = false;
             }
         }
@@ -238,21 +258,16 @@ public class PlayerActivityFragment extends Fragment {
         }
     };
 
-    private void setTrack() {
-        setTrack(mActivity.getArtistName(), mActivity.getTrack());
-    }
+    private void setTrack(int id, boolean isNewTrack) {
+        mTrackId = id;
+        SpotifyTrackSearchResult track = mTracks.get(mTrackId);
+        String albumName = track.getAlbumName();
 
-    public void setTrack(String artistName, SpotifyTrackSearchResult track) {
-        mTrack = track;
-        mArtistName = artistName;
-
-        String albumName = mTrack.getAlbumName();
-
-        mArtistNameView.setText(artistName);
+        mArtistNameView.setText(mArtistName);
         mAlbumNameView.setText(albumName);
-        mTrackNameView.setText(mTrack.getTrackName());
+        mTrackNameView.setText(track.getTrackName());
 
-        String albumImageUrl = mTrack.getImageUrlBig();
+        String albumImageUrl = track.getImageUrlBig();
 
         if (!albumImageUrl.isEmpty()) {
             Glide.with(this)
@@ -263,27 +278,35 @@ public class PlayerActivityFragment extends Fragment {
             mPlayerImage.setContentDescription(getString(R.string.image_of_artist) + albumName);
         }
 
-        if (mBound) {
-            playTrack(mTrack.getTrackUrl());
+        if (isNewTrack) {
+            changePlayButton(TAG_PAUSE);
+            mPlayerTimeStartView.setText("0:00");
+            mPlayerTimeEndView.setText("");
+            mTrackDuration = mLastCurrentPosition = mCurrentPosition = mLastTrackDuration = 0;
+            mSeekBar.setProgress(mCurrentPosition);
         }
-        // if service is not bound yet, set boolean to start track after connection is established
         else {
-            mPlayAfterConnected = true;
+            mPlayerTimeEndView.setText(timeIntToString(mTrackDuration));
+            mSeekBar.setMax(mTrackDuration);
+
+            if (mBound && mPlayerService.isPlaying()) {
+                mSeekBar.setProgress(mCurrentPosition);
+                mPlayerTimeStartView.setText(timeIntToString(mCurrentPosition));
+            }
+            // track has stopped while the activity was closed
+            else {
+                mSeekBar.setProgress(mTrackDuration);
+                mPlayerTimeStartView.setText(timeIntToString(mTrackDuration));
+            }
+
         }
-        changePlayButton(TAG_PAUSE);
-        mPlayerTimeStartView.setText("0:00");
-        mPlayerTimeEndView.setText("");
-        mTrackDuration = mLastCurrentPosition = mCurrentPosition = mLastTrackDuration = 0;
-        mSeekBar.setProgress(mCurrentPosition);
     }
 
-    public void playPauseTrack() {
-        String buttonTag = (String) mPlayButton.getTag();
-
+    public void playPauseTrack(String buttonTag) {
         switch (buttonTag) {
             case TAG_PLAY:
                 Log.d("playPauseTrack", "Button play");
-                playTrack(mTrack.getTrackUrl());
+                mPlayerService.play();
                 changePlayButton(TAG_PAUSE);
                 break;
             case TAG_PAUSE:
@@ -297,19 +320,36 @@ public class PlayerActivityFragment extends Fragment {
         }
     }
 
-    private void playTrack(String trackUrl) {
+    private void playTrack(int trackId) {
             if (!mPlayerService.isPlaying()) {
             changePlayButton(TAG_PAUSE);
         }
 
-        Log.d("playTrack", "Starting track " + trackUrl);
+        Log.d("playTrack", "Starting track with id" + trackId);
 
         mPlayerServiceIntent.setAction(MediaPlayerService.ACTION_PLAY);
-        mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_TRACK_URL, trackUrl);
+        mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_TRACK_ID, trackId);
+        mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_PLAYLIST, mTracks);
+        mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_ARTIST, mArtistName);
 
         mActivity.startService(mPlayerServiceIntent);
+
+        mPlayerServiceIntent.removeExtra(MediaPlayerService.KEY_TRACK_ID);
     }
 
+    public void previous() {
+        if (mBound) {
+            mPlayerService.previous();
+            setTrack(mPlayerService.getTrackId(), true);
+        }
+    }
+
+    public void next() {
+        if (mBound) {
+            mPlayerService.next();
+            setTrack(mPlayerService.getTrackId(), true);
+        }
+    }
 
     private void changePlayButton(String tag) {
         String buttonTag = (String) mPlayButton.getTag();
@@ -357,9 +397,11 @@ public class PlayerActivityFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putParcelable(KEY_TRACK, mTrack);
+        outState.putParcelableArrayList(KEY_TRACKS, mTracks);
         outState.putString(KEY_ARTIST, mArtistName);
+        outState.putString(KEY_TAG, (String) mPlayButton.getTag());
         outState.putInt(KEY_DURATION, mTrackDuration);
         outState.putInt(KEY_CURRENT_POSITION, mCurrentPosition);
+        outState.putInt(KEY_TRACK_ID, mTrackId);
     }
 }

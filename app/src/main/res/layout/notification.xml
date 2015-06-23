@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/content"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        tools:targetApi="jelly_bean" >
+
+        <ImageView
+            android:id="@+id/notification_album"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:contentDescription="@string/empty_image"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/notification_trackname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:textColor="@android:color/black" />
+            <TextView
+                android:id="@+id/notification_artist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:textColor="@android:color/black" />
+        </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/notification_previous"
+            android:background="?android:selectableItemBackground"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_skip_previous_black_48dp"
+            android:contentDescription="@string/button_previous"/>
+
+        <ImageButton
+            android:id="@+id/notification_play"
+            android:background="?android:selectableItemBackground"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_play_arrow_black_48dp"
+            android:visibility="gone"
+            android:contentDescription="@string/button_play"/>
+
+        <ImageButton
+            android:id="@+id/notification_pause"
+            android:background="?android:selectableItemBackground"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_pause_black_48dp"
+            android:contentDescription="@string/button_pause"/>
+
+        <ImageButton
+            android:id="@+id/notification_next"
+            android:background="?android:selectableItemBackground"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_margin="5dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_skip_next_black_48dp"
+            android:contentDescription="@string/button_next"/>
+    </LinearLayout>

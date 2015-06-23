@@ -17,11 +17,11 @@ class TrackAdapter extends ArrayAdapter<SpotifyTrackSearchResult> {
     private final Context mContext;
     private final int mLayoutId;
 
-    public TrackAdapter(Context context, int LayoutId, List<SpotifyTrackSearchResult> artistList) {
-        super(context,LayoutId, artistList);
+    public TrackAdapter(Context context, List<SpotifyTrackSearchResult> artistList) {
+        super(context, R.layout.top_tracks_item_layout, artistList);
         mTrackList = artistList;
         mContext = context;
-        mLayoutId = LayoutId;
+        mLayoutId = R.layout.top_tracks_item_layout;
     }
 
     public View getView(int position, View trackView, ViewGroup parent) {
