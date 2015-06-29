@@ -24,7 +24,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-public class PlayerActivityFragment extends Fragment {
+public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
     private static final String KEY_TRACKS = "me.lehrner.spotifystreamer.tracks";
     private static final String KEY_ARTIST = "me.lehrner.spotifystreamer.artist";
     private static final String KEY_TAG = "me.lehrner.spotifystreamer.tag";
@@ -42,10 +42,10 @@ public class PlayerActivityFragment extends Fragment {
     private MediaPlayerService mPlayerService;
     private Intent mPlayerServiceIntent;
     private View mRootView;
-    private boolean mBound = false, mPlayAfterConnected = false;
+    private boolean mBound = false, mPlayAfterConnected = false, mSeekbarUserTouch = false;
     private String mArtistName;
     private int mTrackDuration = 0, mCurrentPosition = 0, mLastCurrentPosition = 0,
-            mLastTrackDuration = 0, mTrackId = 0;
+            mLastTrackDuration = 0, mTrackId = 0, mProgressByUser = 0;
     private SeekBar mSeekBar;
     private Timer mTimer;
     private TimerTask mUpdateTrackStatus;
@@ -88,7 +88,6 @@ public class PlayerActivityFragment extends Fragment {
         if (savedInstanceState != null) {
             mTracks = savedInstanceState.getParcelableArrayList(KEY_TRACKS);
             mArtistName = savedInstanceState.getString(KEY_ARTIST);
-//            changePlayButton(savedInstanceState.getString(KEY_TAG));
             mTrackId = savedInstanceState.getInt(KEY_TRACK_ID);
 
             mTrackDuration = savedInstanceState.getInt(KEY_DURATION);
@@ -134,6 +133,27 @@ public class PlayerActivityFragment extends Fragment {
         mActivity.bindService(mPlayerServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
 
         startTimer();
+        mSeekBar.setOnSeekBarChangeListener(this);
+    }
+
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if (fromUser) {
+            mProgressByUser = progress;
+            mPlayerTimeStartView.setText(timeIntToString(progress));
+        }
+    }
+
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        mSeekbarUserTouch = true;
+    }
+
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        mSeekbarUserTouch = false;
+        Intent notificationImageIntent = new Intent(mActivity, MediaPlayerService.class);
+        notificationImageIntent.setAction(MediaPlayerService.ACTION_SET_PROGRESS);
+        notificationImageIntent.putExtra(MediaPlayerService.KEY_PROGRESS, mProgressByUser);
+
+        mActivity.startService(notificationImageIntent);
     }
 
     private void startTimer() {
@@ -195,9 +215,6 @@ public class PlayerActivityFragment extends Fragment {
                     }
 
                     int duration = mPlayerService.getDuration();
-
-//                    Log.d("Timer", "duration: " + duration + ", mTrackDuration: " + mTrackDuration);
-
                     mTrackDuration = (duration > 0) ? duration : 0;
 
                     if (mTrackDuration == 0) {
@@ -224,33 +241,28 @@ public class PlayerActivityFragment extends Fragment {
 
                     mCurrentPosition = mPlayerService.getCurrentPosition();
 
-                    // only update time if it has changed
-                    if (mLastCurrentPosition != mCurrentPosition) {
+                    // only update time if it has changed and user isn't using the seekbar
+                    if ((mLastCurrentPosition != mCurrentPosition) && !mSeekbarUserTouch) {
 
                         mActivity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                //Log.d("Timer", "max: " + mSeekBar.getMax() + ", progress: " + mTrackDuration);
-
                                 mPlayerTimeStartView.setText(timeIntToString(mCurrentPosition));
                                 mSeekBar.setProgress(mCurrentPosition);
                             }
                         });
 
                         mLastCurrentPosition = mCurrentPosition;
-//                            Log.d("Player.Timer", "Setting current position to :" + mCurrentPosition);
                     }
 
                 }
                 else {
-//                    if (mBound && mPlayerService.isCompleted()) {
-                        mActivity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                changePlayButton(getString(R.string.TAG_PLAY));
-                            }
-                        });
-//                    }
+                    mActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            changePlayButton(getString(R.string.TAG_PLAY));
+                        }
+                    });
                 }
             }
         };
@@ -303,7 +315,6 @@ public class PlayerActivityFragment extends Fragment {
         }
 
         if (isNewTrack) {
-//            changePlayButton(TAG_PAUSE);
             mPlayerTimeStartView.setText("0:00");
             mPlayerTimeEndView.setText("");
             mTrackDuration = mLastCurrentPosition = mCurrentPosition = mLastTrackDuration = 0;
@@ -341,10 +352,6 @@ public class PlayerActivityFragment extends Fragment {
     }
 
     private void playTrack(int trackId) {
-//            if (!mPlayerService.isPlaying()) {
-//            changePlayButton(TAG_PAUSE);
-//        }
-
         Log.d("playTrack", "Starting track with id" + trackId);
 
         mPlayerServiceIntent.setAction(MediaPlayerService.ACTION_PLAY);

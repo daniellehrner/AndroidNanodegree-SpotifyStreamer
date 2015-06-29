@@ -28,18 +28,20 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
     public static final String ACTION_PAUSE = "me.lehrner.spotifystreamer.PAUSE";
     public static final String ACTION_START = "me.lehrner.spotifystreamer.START";
     public static final String ACTION_SET_IMAGE = "me.lehrner.spotifystreamer.SET_IMAGE";
+    public static final String ACTION_SET_PROGRESS = "me.lehrner.spotifystreamer.SET_PROGRESS";
 
     public static final String KEY_TRACK_ID = "me.lehrner.spotifystreamer.track.id";
     public static final String KEY_PLAYLIST = "me.lehrner.spotifystreamer.playlist";
     public static final String KEY_NOTIFICATION_IMAGE = "me.lehrner.spotifystreamer.notification.image";
     public static final String KEY_ARTIST = "me.lehrner.spotifystreamer.artist";
+    public static final String KEY_PROGRESS = "me.lehrner.spotifystreamer.progress";
 
     private static final int NO_TRACK = -1;
     private static final int mNotificationId = 34589;
 
     private MediaPlayer mMediaPlayer = null;
     private final IBinder mBinder = new MediaPlayerBinder();
-    private int mStartId = 0, mTrackId = 0, mListSize = 0, mDuration = 0;
+    private int mStartId = 0, mTrackId = 0, mListSize = 0, mDuration = 0, mUserProgress = 0;
     private ArrayList<SpotifyTrackSearchResult> mPlayList;
     private PlayerState mPLayerState = PlayerState.IDLE;
     private NotificationCompat.Builder mNotificationBuilder;
@@ -124,16 +126,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
             Log.d("Player.onStartCommand", "Started");
         }
         else {
-            if (mMediaPlayer == null) {
-                initMediaPlayer();
-            }
-            else {
-                mMediaPlayer.reset();
-                mDuration = 0;
-            }
-            mPLayerState = PlayerState.IDLE;
-            Log.d("Player.onStartCommand", "Idle");
-            setDataSource(mPlayList.get(mTrackId).getTrackUrl());
+            play(mTrackId);
         }
     }
 
@@ -147,7 +140,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
         }
 
         mPLayerState = PlayerState.IDLE;
-        Log.d("Player.onStartCommand", "Idle");
+        Log.d("Player.play", "Idle");
         setDataSource(mPlayList.get(playListId).getTrackUrl());
         mTrackId = playListId;
     }
@@ -248,6 +241,10 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                 Log.d("Service.onStartCommand", "Set image");
                 setNotificationImage((Bitmap) intent.getParcelableExtra(KEY_NOTIFICATION_IMAGE));
                 break;
+            case ACTION_SET_PROGRESS:
+                Log.d("Service.onStartCommand", "Set progress");
+                setProgressAndPlay(intent.getIntExtra(KEY_PROGRESS, 0));
+                break;
             default:
                 Log.e("Service.onStartCommand", "Invalid action: " + intent.getAction());
         }
@@ -260,6 +257,28 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
         showNotification();
 
         return START_NOT_STICKY;
+    }
+
+    private void setProgressAndPlay(int progress) {
+        if (mMediaPlayer == null) {
+            initMediaPlayer();
+        }
+
+        switch(mPLayerState) {
+            case STARTED:
+                mMediaPlayer.seekTo(progress);
+                break;
+            case PAUSE:
+                mMediaPlayer.seekTo(progress);
+                play();
+                break;
+            case COMPLETED:
+                mUserProgress = progress;
+                play();
+                break;
+            default:
+                Log.d("setProgressAndPlay", "Nothing to do in state idle");
+        }
     }
 
     private void setNotificationImage(Bitmap bitmap) {
@@ -346,9 +365,14 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
 
     // Called when MediaPlayer is ready
     public void onPrepared(MediaPlayer mediaPlayer) {
+        if (mUserProgress != 0) {
+            mediaPlayer.seekTo(mUserProgress);
+            mUserProgress = 0;
+        }
 
         mediaPlayer.start();
         mPLayerState = PlayerState.STARTED;
+        updateNotificationPlayPause(ACTION_PLAY);
         mDuration = mediaPlayer.getDuration();
         Log.d("Player.onPrepared", "Started, duration: " + mDuration);
     }
