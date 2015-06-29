@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="me.lehrner.spotifystreamer" >
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -29,7 +30,8 @@
             android:name=".TopTracks"
             android:label="@string/title_activity_top_tracks"
             android:launchMode="singleTop"
-            android:parentActivityName=".MainActivity" >
+            android:parentActivityName=".MainActivity"
+            tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="me.lehrner.spotifystreamer.MainActivity" />
@@ -43,7 +45,8 @@
         <activity
             android:name=".PlayerActivity"
             android:label="@string/app_name"
-            android:parentActivityName=".TopTracks" >
+            android:parentActivityName=".TopTracks"
+            tools:ignore="UnusedAttribute">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="me.lehrner.spotifystreamer.TopTracks" />

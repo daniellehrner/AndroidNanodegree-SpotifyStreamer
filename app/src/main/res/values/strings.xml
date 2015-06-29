@@ -15,4 +15,7 @@
     <string name="button_previous">Previous button</string>
     <string name="button_next">Next button</string>
 
+    <string name="TAG_PLAY" translatable="false" >TAG_PLAY</string>
+    <string name="TAG_PAUSE" translatable="false" >TAG_PAUSE</string>
+
 </resources>

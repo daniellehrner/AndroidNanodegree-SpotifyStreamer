@@ -22,8 +22,8 @@ import java.util.ArrayList;
 public class MainActivityFragment extends Fragment {
     private static final String KEY_ARTIST_LIST = "me.lehrner.spotifystreamer.artists";
     private static final String KEY_LIST_VIEW = "me.lehrner.spotifystreamer.artist.listview";
-    public final static String ARTIST_NAME = "me.lehrner.spotifystreamer.ARTISTNAME";
-    public final static String ARTIST_ID = "me.lehrner.spotifystreamer.ARTISTID";
+    public final static String ARTIST_NAME = "me.lehrner.spotifystreamer.ARTIST_NAME";
+    public final static String ARTIST_ID = "me.lehrner.spotifystreamer.ARTIST_ID";
     private final static String KEY_LAST_ARTIST = "me.lehrner.spotifystreamer.lastArtist";
 
     private ArtistAdapter mAdapter;

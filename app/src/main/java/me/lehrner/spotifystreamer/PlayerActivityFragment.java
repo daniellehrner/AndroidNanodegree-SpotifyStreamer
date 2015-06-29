@@ -24,7 +24,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-
 public class PlayerActivityFragment extends Fragment {
     private static final String KEY_TRACKS = "me.lehrner.spotifystreamer.tracks";
     private static final String KEY_ARTIST = "me.lehrner.spotifystreamer.artist";
@@ -32,9 +31,6 @@ public class PlayerActivityFragment extends Fragment {
     private static final String KEY_DURATION = "me.lehrner.spotifystreamer.duration";
     private static final String KEY_CURRENT_POSITION = "me.lehrner.spotifystreamer.position";
     private static final String KEY_TRACK_ID = "me.lehrner.spotifystreamer.track.id";
-
-    private static final String TAG_PLAY = "play";
-    private static final String TAG_PAUSE = "pause";
 
     private static final int DELAY = 200, PERIOD = 200;
 
@@ -92,7 +88,7 @@ public class PlayerActivityFragment extends Fragment {
         if (savedInstanceState != null) {
             mTracks = savedInstanceState.getParcelableArrayList(KEY_TRACKS);
             mArtistName = savedInstanceState.getString(KEY_ARTIST);
-            changePlayButton(savedInstanceState.getString(KEY_TAG));
+//            changePlayButton(savedInstanceState.getString(KEY_TAG));
             mTrackId = savedInstanceState.getInt(KEY_TRACK_ID);
 
             mTrackDuration = savedInstanceState.getInt(KEY_DURATION);
@@ -161,6 +157,17 @@ public class PlayerActivityFragment extends Fragment {
                     return;
                 }
 
+                final int trackId = mPlayerService.getTrackId();
+
+                if (trackId != mTrackId) {
+                    mActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            setTrack(trackId, true);
+                        }
+                    });
+                }
+
                 if (mPlayerService.isIdle()) {
                     mPlayButton.setClickable(false);
                     return;
@@ -170,6 +177,23 @@ public class PlayerActivityFragment extends Fragment {
                 }
 
                 if (!mPlayerService.isCompleted()) {
+                    if (mPlayerService.isPlaying() && mPlayButton.getTag().equals(getString(R.string.TAG_PLAY))) {
+                        mActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                changePlayButton(getString(R.string.TAG_PAUSE));
+                            }
+                        });
+                    }
+                    else if (!mPlayerService.isPlaying() && mPlayButton.getTag().equals(getString(R.string.TAG_PAUSE))) {
+                        mActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                changePlayButton(getString(R.string.TAG_PLAY));
+                            }
+                        });
+                    }
+
                     int duration = mPlayerService.getDuration();
 
 //                    Log.d("Timer", "duration: " + duration + ", mTrackDuration: " + mTrackDuration);
@@ -223,7 +247,7 @@ public class PlayerActivityFragment extends Fragment {
                         mActivity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                changePlayButton(TAG_PLAY);
+                                changePlayButton(getString(R.string.TAG_PLAY));
                             }
                         });
 //                    }
@@ -279,7 +303,7 @@ public class PlayerActivityFragment extends Fragment {
         }
 
         if (isNewTrack) {
-            changePlayButton(TAG_PAUSE);
+//            changePlayButton(TAG_PAUSE);
             mPlayerTimeStartView.setText("0:00");
             mPlayerTimeEndView.setText("");
             mTrackDuration = mLastCurrentPosition = mCurrentPosition = mLastTrackDuration = 0;
@@ -298,32 +322,28 @@ public class PlayerActivityFragment extends Fragment {
                 mSeekBar.setProgress(mTrackDuration);
                 mPlayerTimeStartView.setText(timeIntToString(mTrackDuration));
             }
-
         }
     }
 
     public void playPauseTrack(String buttonTag) {
-        switch (buttonTag) {
-            case TAG_PLAY:
-                Log.d("playPauseTrack", "Button play");
-                mPlayerService.play();
-                changePlayButton(TAG_PAUSE);
-                break;
-            case TAG_PAUSE:
-                Log.d("playPauseTrack", "Button pause");
-                mPlayerService.pause();
-                changePlayButton(TAG_PLAY);
-                break;
-            default:
-                Log.e("switchPlayButtonSymbol", "Invalid button tag: " + buttonTag);
-                mActivity.finish();
+        if (buttonTag.equals(getString(R.string.TAG_PLAY))) {
+            Log.d("playPauseTrack", "Button play");
+            sendMediaPlayerIntent(MediaPlayerService.ACTION_PLAY);
+        }
+        else if (buttonTag.equals(getString(R.string.TAG_PAUSE))) {
+            Log.d("playPauseTrack", "Button pause");
+            sendMediaPlayerIntent(MediaPlayerService.ACTION_PAUSE);
+        }
+        else {
+            Log.e("playPauseTrack", "Invalid button tag: " + buttonTag);
+            mActivity.finish();
         }
     }
 
     private void playTrack(int trackId) {
-            if (!mPlayerService.isPlaying()) {
-            changePlayButton(TAG_PAUSE);
-        }
+//            if (!mPlayerService.isPlaying()) {
+//            changePlayButton(TAG_PAUSE);
+//        }
 
         Log.d("playTrack", "Starting track with id" + trackId);
 
@@ -339,16 +359,20 @@ public class PlayerActivityFragment extends Fragment {
 
     public void previous() {
         if (mBound) {
-            mPlayerService.previous();
-            setTrack(mPlayerService.getTrackId(), true);
+            sendMediaPlayerIntent(MediaPlayerService.ACTION_PREVIOUS);
         }
     }
 
     public void next() {
         if (mBound) {
-            mPlayerService.next();
-            setTrack(mPlayerService.getTrackId(), true);
+            sendMediaPlayerIntent(MediaPlayerService.ACTION_NEXT);
         }
+    }
+
+    private void sendMediaPlayerIntent(String action) {
+        Intent intent = new Intent(mActivity, MediaPlayerService.class);
+        intent.setAction(action);
+        mActivity.startService(intent);
     }
 
     private void changePlayButton(String tag) {
@@ -358,18 +382,17 @@ public class PlayerActivityFragment extends Fragment {
             return;
         }
 
-        switch (tag) {
-            case TAG_PLAY:
-                mPlayButton.setImageResource(R.drawable.ic_play_arrow_black_48dp);
-                mPlayButton.setTag(TAG_PLAY);
-                break;
-            case TAG_PAUSE:
-                mPlayButton.setImageResource(R.drawable.ic_pause_black_48dp);
-                mPlayButton.setTag(TAG_PAUSE);
-                break;
-            default:
-                Log.e("switchPlayButtonSymbol", "Invalid button tag: " + buttonTag);
-                mActivity.finish();
+        if (tag.equals(getString(R.string.TAG_PLAY))) {
+            mPlayButton.setImageResource(R.drawable.ic_play_arrow_black_48dp);
+            mPlayButton.setTag(getString(R.string.TAG_PLAY));
+        }
+        else if (tag.equals(getString(R.string.TAG_PAUSE))) {
+            mPlayButton.setImageResource(R.drawable.ic_pause_black_48dp);
+            mPlayButton.setTag(getString(R.string.TAG_PAUSE));
+        }
+        else {
+            Log.e("changePlayButton", "Invalid button tag: " + buttonTag);
+            mActivity.finish();
         }
     }
 

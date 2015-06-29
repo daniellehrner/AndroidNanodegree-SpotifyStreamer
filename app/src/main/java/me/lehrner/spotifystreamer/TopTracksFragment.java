@@ -45,6 +45,8 @@ public class TopTracksFragment extends Fragment {
                              Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.fragment_top_tracks, container, false);
 
+
+
         return mRootView;
     }
 
@@ -151,6 +153,7 @@ public class TopTracksFragment extends Fragment {
                     }
                 });
     }
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

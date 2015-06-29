@@ -10,8 +10,8 @@ import com.bumptech.glide.Glide;
 
 public class TopTracks extends AppCompatActivity {
     private static final String FRAGMENT = "me.lehrner.spotifystreamer.TopTracksFragment";
-    private final static String KEY_ARTIST_NAME = "me.lehrner.spotifystreamer.topTracks.ARTISTNAME";
-    private final static String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.topTracks.ARTISTID";
+    private final static String KEY_ARTIST_NAME = "me.lehrner.spotifystreamer.topTracks.ARTIST_NAME";
+    private final static String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.topTracks.ARTIST_ID";
 
     private TopTracksFragment mFragment;
     private String mArtistName;
