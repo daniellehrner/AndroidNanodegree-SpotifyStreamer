@@ -16,6 +16,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.squareup.leakcanary.RefWatcher;
+
 import java.util.ArrayList;
 
 public class TopTracksFragment extends Fragment {
@@ -162,5 +164,12 @@ public class TopTracksFragment extends Fragment {
         outState.putParcelableArrayList(KEY_TRACK_LIST, mTracks);
         outState.putParcelable(KEY_LIST_VIEW, mListView.onSaveInstanceState());
         outState.putString(KEY_ARTIST_ID, mArtistId);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        RefWatcher refWatcher = SpotifyStreamerApplication.getRefWatcher(mActivity);
+        refWatcher.watch(this);
     }
 }

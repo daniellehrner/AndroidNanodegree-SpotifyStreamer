@@ -18,6 +18,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.squareup.leakcanary.RefWatcher;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -190,10 +191,22 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
 
                 if (mPlayerService.isIdle()) {
                     mPlayButton.setClickable(false);
+                    mActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSeekBar.setEnabled(false);
+                        }
+                    });
                     return;
                 }
                 else {
                     mPlayButton.setClickable(true);
+                    mActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mSeekBar.setEnabled(true);
+                        }
+                    });
                 }
 
                 if (!mPlayerService.isCompleted()) {
@@ -241,6 +254,10 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
 
                     mCurrentPosition = mPlayerService.getCurrentPosition();
 
+                    if ((mCurrentPosition < 0) ||(mCurrentPosition > mTrackDuration)) {
+                        mCurrentPosition = 0;
+                    }
+
                     // only update time if it has changed and user isn't using the seekbar
                     if ((mLastCurrentPosition != mCurrentPosition) && !mSeekbarUserTouch) {
 
@@ -274,8 +291,8 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
-            MediaPlayerService.MediaPlayerBinder binder = (MediaPlayerService.MediaPlayerBinder) service;
-            mPlayerService = binder.getService();
+            MediaPlayerBinder mBinder = (MediaPlayerBinder) service;
+            mPlayerService = mBinder.getService();
             mBound = true;
 
             Log.d("onServiceConnected", "Bound");
@@ -433,5 +450,12 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
         outState.putInt(KEY_DURATION, mTrackDuration);
         outState.putInt(KEY_CURRENT_POSITION, mCurrentPosition);
         outState.putInt(KEY_TRACK_ID, mTrackId);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        RefWatcher refWatcher = SpotifyStreamerApplication.getRefWatcher(mActivity);
+        refWatcher.watch(this);
     }
 }

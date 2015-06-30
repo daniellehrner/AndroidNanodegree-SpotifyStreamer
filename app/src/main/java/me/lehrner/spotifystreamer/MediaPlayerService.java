@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.os.Binder;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -40,7 +39,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
     private static final int mNotificationId = 34589;
 
     private MediaPlayer mMediaPlayer = null;
-    private final IBinder mBinder = new MediaPlayerBinder();
+    private MediaPlayerBinder mBinder;
     private int mStartId = 0, mTrackId = 0, mListSize = 0, mDuration = 0, mUserProgress = 0;
     private ArrayList<SpotifyTrackSearchResult> mPlayList;
     private PlayerState mPLayerState = PlayerState.IDLE;
@@ -49,12 +48,6 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
     private String mArtist;
     private boolean mNotForeground = true;
     private NotificationManager mNotificationManager;
-
-    public class MediaPlayerBinder extends Binder {
-         MediaPlayerService getService() {
-            return MediaPlayerService.this;
-        }
-    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -210,10 +203,11 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                 }
                 break;
             case ACTION_START:
+                Log.d("Service.onStartCommand", "Service started");
                 mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 createNotificationRemoteViews();
                 createNotificationBuilder();
-                Log.d("Service.onStartCommand", "Service started");
+                mBinder = new MediaPlayerBinder(this);
                 break;
             case ACTION_PREVIOUS:
                 Log.d("Service.onStartCommand", "Previous");
@@ -457,5 +451,10 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
             Log.d("Service.onDestroy", "stop foreground");
             stopForeground(true);
         }
+
+        mBinder.clear();
+
+//        RefWatcher refWatcher = SpotifyStreamerApplication.getRefWatcher(getApplication());
+//        refWatcher.watch(this);
     }
 }

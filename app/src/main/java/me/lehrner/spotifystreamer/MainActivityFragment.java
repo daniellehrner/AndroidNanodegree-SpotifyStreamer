@@ -17,6 +17,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.squareup.leakcanary.RefWatcher;
+
 import java.util.ArrayList;
 
 public class MainActivityFragment extends Fragment {
@@ -192,5 +194,12 @@ public class MainActivityFragment extends Fragment {
         }
 
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        RefWatcher refWatcher = SpotifyStreamerApplication.getRefWatcher(mActivity);
+        refWatcher.watch(this);
     }
 }

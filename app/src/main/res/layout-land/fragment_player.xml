@@ -6,25 +6,13 @@
     android:padding="@dimen/activity_horizontal_margin"
     tools:context="me.lehrner.spotifystreamer.PlayerActivityFragment">
 
-    <ImageView
-        android:id="@+id/player_image_view"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:src="@drawable/vinyl"
-        android:contentDescription="@string/empty_image"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_above="@+id/player_time_progress"
-        android:layout_marginRight="@dimen/activity_horizontal_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"/>
-
     <RelativeLayout
         android:id="@+id/player_button_layout"
-        android:layout_width="fill_parent"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:layout_above="@id/player_time_progress"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true">
+        android:layout_alignBottom="@+id/player_image_view"
+        android:layout_alignRight="@id/player_time_progress"
+        android:layout_alignEnd="@id/player_time_progress">
 
         <ImageButton
             android:id="@+id/player_image_previous"
@@ -57,6 +45,18 @@
             android:onClick="buttonPrevNext" />
 
     </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/player_image_view"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/vinyl"
+        android:contentDescription="@string/empty_image"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_above="@id/player_time_progress"
+        android:layout_toLeftOf="@id/player_button_layout"
+        android:layout_toStartOf="@id/player_button_layout"/>
 
     <TextView
         android:id="@+id/player_artist_name"
@@ -102,8 +102,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:layout_toRightOf="@id/player_time_start"
-        android:layout_toEndOf="@id/player_time_start"/>
+        tools:ignore="RelativeOverlap" />
 
     <SeekBar android:id="@id/player_time_progress"
         android:indeterminate="false"
