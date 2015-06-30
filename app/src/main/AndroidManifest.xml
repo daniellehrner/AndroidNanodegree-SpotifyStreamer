@@ -56,6 +56,11 @@
             android:name=".MediaPlayerService"
             android:exported="false" >
         </service>
+        <receiver android:name=".MusicIntentReceiver">
+            <intent-filter>
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

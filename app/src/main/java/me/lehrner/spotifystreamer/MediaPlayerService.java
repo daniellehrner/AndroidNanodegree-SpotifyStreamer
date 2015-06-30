@@ -354,6 +354,10 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
     }
 
     private void showNotification() {
+        if((mMediaPlayer == null) || (mNotificationBuilder == null)) {
+            return;
+        }
+
         if (mNotForeground) {
             startForeground(mNotificationId, mNotificationBuilder.build());
             mNotForeground = false;
