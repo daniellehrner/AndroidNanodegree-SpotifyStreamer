@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.SearchView;
 import android.widget.Toast;
 
 import com.squareup.leakcanary.RefWatcher;
@@ -31,6 +32,7 @@ public class MainActivityFragment extends Fragment {
     private ArtistAdapter mAdapter;
     private ArrayList<SpotifyArtistSearchResult> mArtists;
     private ListView mListView;
+    private SearchView mSearchView;
     private View mLoadingView, mRootView;
     private int mShortAnimationDuration;
     private Toast toast;
@@ -46,19 +48,20 @@ public class MainActivityFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         mRootView = inflater.inflate(R.layout.fragment_search, container, false);
-
         return mRootView;
     }
 
     @SuppressLint("ShowToast")
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        Log.d("Main.onActivityCreated", "Start");
         super.onActivityCreated(savedInstanceState);
 
         mContext = getActivity();
         toast = Toast.makeText(mContext, " ", Toast.LENGTH_SHORT);
 
         mListView = (ListView) mRootView.findViewById(R.id.listview_search_result);
+        mSearchView = (SearchView) mRootView.findViewById(R.id.search_text);
         mLoadingView = mRootView.findViewById(R.id.loading_spinner_artist);
 
         // Retrieve and cache the system's default "short" animation time.
@@ -78,6 +81,7 @@ public class MainActivityFragment extends Fragment {
                 Intent topTracksIntent = new Intent(mContext, TopTracks.class);
                 topTracksIntent.putExtra(ARTIST_NAME, clickedItem.getArtistName());
                 topTracksIntent.putExtra(ARTIST_ID, clickedItem.getArtistId());
+                topTracksIntent.putExtra(MainActivity.KEY_QUERY, mActivity.getQuery());
                 startActivity(topTracksIntent);
             }
         });
@@ -116,9 +120,15 @@ public class MainActivityFragment extends Fragment {
     }
 
     public void updateArtistView(String artist) {
+        Log.d("updateArtistView", "Start");
         if (mLastArtist != null && mLastArtist.equals(artist)) {
             showToast(getString(R.string.same_artist));
             return;
+        }
+
+        if (mSearchView.getQuery().length() == 0) {
+            mSearchView.setQuery(artist, false);
+            mSearchView.clearFocus();
         }
 
         mLastArtist = artist;

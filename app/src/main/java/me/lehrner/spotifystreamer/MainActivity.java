@@ -5,23 +5,31 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
-import android.support.v4.app.FragmentManager;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import android.widget.SearchView;
+import android.support.v7.widget.SearchView;
 
 import com.bumptech.glide.Glide;
 
 public class MainActivity extends AppCompatActivity {
     private static final String FRAGMENT = "me.lehrner.spotifystreamer.MainActivityFragment";
+    public static final String KEY_QUERY = "me.lehrner.spotifystreamer.key.query";
     private MainActivityFragment mFragment;
+
+    public String getQuery() {
+        return mQuery;
+    }
+
+    private String mQuery;
 
     @Override
     protected void onNewIntent(Intent intent) {
-        Log.d("onNewIntent", "Start");
+        super.onNewIntent(intent);
+        Log.d("Main.onNewIntent", "Start");
 
         setIntent(intent);
         handleIntent(getIntent());
@@ -29,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("onCreate", "Start");
+        Log.d("Main.onCreate", "Start");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
@@ -38,29 +46,27 @@ public class MainActivity extends AppCompatActivity {
             //Restore the fragment's instance
             mFragment = (MainActivityFragment) getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT);
             setIntent(new Intent(Intent.ACTION_MAIN));
-        }
-        else {
-            mFragment = (MainActivityFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_search);
+            mQuery = savedInstanceState.getString(KEY_QUERY);
         }
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) findViewById(R.id.search_text);
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
         handleIntent(getIntent());
     }
+
 
     private void handleIntent(Intent intent) {
         Log.d("handleIntent", "Action: " + intent.getAction());
 
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            String query = intent.getStringExtra(SearchManager.QUERY);
-
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            MainActivityFragment fragment = (MainActivityFragment)
-                    fragmentManager.findFragmentById(R.id.fragment_search);
-
-            fragment.updateArtistView(query);
+            mQuery = intent.getStringExtra(SearchManager.QUERY);
+            mFragment.updateArtistView(mQuery);
         }
     }
 
@@ -99,6 +105,16 @@ public class MainActivity extends AppCompatActivity {
 
         //Save the fragment's instance
         getSupportFragmentManager().putFragment(outState, FRAGMENT, mFragment);
+        outState.putString(KEY_QUERY, mQuery);
+    }
+
+    @Override
+    public void onAttachFragment (Fragment fragment) {
+       String fragmentName = fragment.getClass().getName();
+
+        if (fragmentName.equals(FRAGMENT)) {
+            mFragment = (MainActivityFragment) fragment;
+        }
     }
 
     @Override

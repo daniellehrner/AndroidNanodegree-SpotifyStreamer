@@ -2,7 +2,6 @@ package me.lehrner.spotifystreamer;
 
 import android.app.Activity;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
@@ -43,7 +42,7 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
     private MediaPlayerService mPlayerService;
     private Intent mPlayerServiceIntent;
     private View mRootView;
-    private boolean mBound = false, mPlayAfterConnected = false, mSeekbarUserTouch = false;
+    private boolean mBound = false, mPlayAfterConnected = false, mSeekBarUserTouch = false;
     private String mArtistName;
     private int mTrackDuration = 0, mCurrentPosition = 0, mLastCurrentPosition = 0,
             mLastTrackDuration = 0, mTrackId = 0, mProgressByUser = 0;
@@ -99,14 +98,14 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
             mPlayerTimeStartView.setText(timeIntToString(mCurrentPosition));
         }
         else {
-            mPlayerServiceIntent.setAction(MediaPlayerService.ACTION_START);
-            mActivity.startService(mPlayerServiceIntent);
+//            mPlayerServiceIntent.setAction(MediaPlayerService.ACTION_START);
+//            mActivity.startService(mPlayerServiceIntent);
             mTracks = mActivity.getTracks();
             mArtistName = mActivity.getArtistName();
             mTrackId = mActivity.getTrackId();
 
             newTrack = true;
-            autoStart = true;
+            autoStart = !mActivity.getIsNotificationIntent();
         }
 
         setTrack(mTrackId, newTrack);
@@ -131,7 +130,7 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
         mActivity.startService(mPlayerServiceIntent);
 
         mPlayerServiceIntent = new Intent(mActivity, MediaPlayerService.class);
-        mActivity.bindService(mPlayerServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
+        mActivity.bindService(mPlayerServiceIntent, mConnection, 0);
 
         startTimer();
         mSeekBar.setOnSeekBarChangeListener(this);
@@ -145,11 +144,11 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
     }
 
     public void onStartTrackingTouch(SeekBar seekBar) {
-        mSeekbarUserTouch = true;
+        mSeekBarUserTouch = true;
     }
 
     public void onStopTrackingTouch(SeekBar seekBar) {
-        mSeekbarUserTouch = false;
+        mSeekBarUserTouch = false;
         Intent notificationImageIntent = new Intent(mActivity, MediaPlayerService.class);
         notificationImageIntent.setAction(MediaPlayerService.ACTION_SET_PROGRESS);
         notificationImageIntent.putExtra(MediaPlayerService.KEY_PROGRESS, mProgressByUser);
@@ -258,8 +257,8 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
                         mCurrentPosition = 0;
                     }
 
-                    // only update time if it has changed and user isn't using the seekbar
-                    if ((mLastCurrentPosition != mCurrentPosition) && !mSeekbarUserTouch) {
+                    // only update time if it has changed and user isn't using the seek bar
+                    if ((mLastCurrentPosition != mCurrentPosition) && !mSeekBarUserTouch) {
 
                         mActivity.runOnUiThread(new Runnable() {
                             @Override
@@ -375,6 +374,8 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
         mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_TRACK_ID, trackId);
         mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_PLAYLIST, mTracks);
         mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_ARTIST, mArtistName);
+        mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_ARTIST_ID, mActivity.getArtistId());
+        mPlayerServiceIntent.putExtra(MainActivity.KEY_QUERY, mActivity.getQuery());
 
         mActivity.startService(mPlayerServiceIntent);
 

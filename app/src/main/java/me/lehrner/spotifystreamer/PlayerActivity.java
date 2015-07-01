@@ -17,14 +17,16 @@ public class PlayerActivity extends AppCompatActivity {
     private static final String KEY_TRACKS = "me.lehrner.spotifystreamer.tracks";
     private static final String KEY_ARTIST = "me.lehrner.spotifystreamer.artist";
     private static final String KEY_ARRAY_ID = "me.lehrner.spotifystreamer.tag";
+    private static final String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.id";
 
-    private String mArtistName;
+    private String mArtistName, mArtistId, mQuery;
     private int mArrayId;
     private ArrayList<SpotifyTrackSearchResult> mTracks;
     private PlayerActivityFragment mFragment;
+    private boolean mIsNotificationIntent = false;
 
     @SuppressWarnings("unused")
-    public void buttonPrevNext (View view) {
+    public void buttonPrevNext(View view) {
         switch (view.getId()) {
             case R.id.player_image_next:
                 Log.d("buttonPrevNext", "Button next");
@@ -40,12 +42,16 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     @SuppressWarnings("unused")
-    public void buttonPlay (View view) {
+    public void buttonPlay(View view) {
         mFragment.playPauseTrack((String) view.getTag());
     }
 
     public String getArtistName() {
-        return  mArtistName;
+        return mArtistName;
+    }
+
+    public boolean getIsNotificationIntent() {
+        return mIsNotificationIntent;
     }
 
     public ArrayList<SpotifyTrackSearchResult> getTracks() {
@@ -54,6 +60,14 @@ public class PlayerActivity extends AppCompatActivity {
 
     public int getTrackId() {
         return mArrayId;
+    }
+
+    public String getArtistId() {
+        return mArtistId;
+    }
+
+    public String getQuery() {
+        return mQuery;
     }
 
     @Override
@@ -67,18 +81,30 @@ public class PlayerActivity extends AppCompatActivity {
             mTracks = savedInstanceState.getParcelableArrayList(KEY_TRACKS);
             mArrayId = savedInstanceState.getInt(KEY_ARRAY_ID);
             mArtistName = savedInstanceState.getString(KEY_ARTIST);
-        }
-        else {
+            mArtistId = savedInstanceState.getString(KEY_ARTIST_ID);
+            mQuery = savedInstanceState.getString(MainActivity.KEY_QUERY);
+        } else {
             handleIntent(getIntent());
         }
     }
 
     private void handleIntent(Intent intent) {
-        Log.d("handleIntent", "Action: " + intent.getAction());
+        Log.d("Player.handleIntent", "Action: " + intent.getAction());
+
+        if (intent.getAction() != null && intent.getAction().equals(MediaPlayerService.ACTION_NOTIFICATION)) {
+            Log.d("Player.handleIntent", "Intent from Notification");
+            mIsNotificationIntent = true;
+        }
+        else {
+            mIsNotificationIntent = false;
+        }
 
         mArrayId = intent.getIntExtra(TopTracksFragment.ARRAY_ID, -1);
+
         mTracks =  intent.getParcelableArrayListExtra(TopTracksFragment.TRACK_ARRAY);
         mArtistName = intent.getStringExtra(TopTracksFragment.ARTIST_NAME);
+        mArtistId = intent.getStringExtra(TopTracksFragment.ARTIST_ID);
+        mQuery = intent.getStringExtra(MainActivity.KEY_QUERY);
 
         try {
             if (mTracks != null) {
@@ -118,5 +144,7 @@ public class PlayerActivity extends AppCompatActivity {
         outState.putParcelableArrayList(KEY_TRACKS, mTracks);
         outState.putString(KEY_ARTIST, mArtistName);
         outState.putInt(KEY_ARRAY_ID, mArrayId);
+        outState.putString(KEY_ARTIST_ID, mArtistId);
+        outState.putString(MainActivity.KEY_QUERY, mQuery);
     }
 }

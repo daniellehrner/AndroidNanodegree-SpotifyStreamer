@@ -7,6 +7,7 @@ import android.content.Context;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
 
+@SuppressWarnings("WeakerAccess")
 public class SpotifyStreamerApplication extends Application {
 
     public static RefWatcher getRefWatcher(Context context) {

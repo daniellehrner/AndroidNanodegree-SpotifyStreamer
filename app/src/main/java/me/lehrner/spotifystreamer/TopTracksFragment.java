@@ -26,6 +26,7 @@ public class TopTracksFragment extends Fragment {
     private final static String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.track.artistId";
 
     public final static String ARRAY_ID = "me.lehrner.spotifystreamer.ARRAY_ID";
+    public final static String ARTIST_ID = "me.lehrner.spotifystreamer.ARTIST_ID";
     public final static String ARTIST_NAME = "me.lehrner.spotifystreamer.ARTIST_NAME";
     public final static String TRACK_ARRAY = "me.lehrner.spotifystreamer.TRACK_ARRAY";
 
@@ -46,9 +47,6 @@ public class TopTracksFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.fragment_top_tracks, container, false);
-
-
-
         return mRootView;
     }
 
@@ -71,8 +69,25 @@ public class TopTracksFragment extends Fragment {
                         new ArrayList<SpotifyTrackSearchResult>());
 
         mListView = (ListView) mRootView.findViewById(R.id.listview_track_search_result);
-
         mListView.setAdapter(mTrackAdapter);
+
+        if (savedInstanceState != null) {
+            Log.d("TrackOnActivityCreated", "is a saved instance");
+
+            mTracks = savedInstanceState.getParcelableArrayList(KEY_TRACK_LIST);
+            mListView.onRestoreInstanceState(savedInstanceState.getParcelable(KEY_LIST_VIEW));
+            mArtistId = savedInstanceState.getString(KEY_ARTIST_ID);
+
+            addAllAdapter(mTracks);
+            fadeListViewIn();
+
+        }
+        else {
+            Log.d("TrackOnActivityCreated", "is not  a saved instance");
+            mArtistId = mActivity.getArtistId();
+            SpotifyTrackSearch spotifySearch = new SpotifyTrackSearch();
+            spotifySearch.updateListView(mArtistId, mActivity, this);
+        }
 
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -90,27 +105,11 @@ public class TopTracksFragment extends Fragment {
                 playerIntent.putExtra(ARTIST_NAME, mActivity.getArtistName());
                 playerIntent.putExtra(ARRAY_ID, arrayPos);
                 playerIntent.putParcelableArrayListExtra(TRACK_ARRAY, mTracks);
+                playerIntent.putExtra(ARTIST_ID, mArtistId);
+                playerIntent.putExtra(MainActivity.KEY_QUERY, mActivity.getQuery());
                 startActivity(playerIntent);
             }
         });
-
-        if (savedInstanceState != null) {
-            Log.d("TrackOnActivityCreated", "is a saved instance");
-
-            mListView.onRestoreInstanceState(savedInstanceState.getParcelable(KEY_LIST_VIEW));
-            mTracks = savedInstanceState.getParcelableArrayList(KEY_TRACK_LIST);
-            mArtistId = savedInstanceState.getString(KEY_ARTIST_ID);
-
-            addAllAdapter(mTracks);
-            fadeListViewIn();
-
-        }
-        else {
-            Log.d("TrackOnActivityCreated", "is not  a saved instance");
-            mArtistId = mActivity.getArtistId();
-            SpotifyTrackSearch spotifySearch = new SpotifyTrackSearch();
-            spotifySearch.updateListView(mArtistId, mActivity, this);
-        }
     }
 
     @Override

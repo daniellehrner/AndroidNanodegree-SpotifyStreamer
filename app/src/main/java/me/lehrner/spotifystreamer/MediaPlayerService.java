@@ -2,6 +2,7 @@ package me.lehrner.spotifystreamer;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.SearchManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +11,7 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
@@ -28,11 +30,13 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
     public static final String ACTION_START = "me.lehrner.spotifystreamer.START";
     public static final String ACTION_SET_IMAGE = "me.lehrner.spotifystreamer.SET_IMAGE";
     public static final String ACTION_SET_PROGRESS = "me.lehrner.spotifystreamer.SET_PROGRESS";
+    public static final String ACTION_NOTIFICATION = "me.lehrner.spotifystreamer.NOTIFICATION";
 
     public static final String KEY_TRACK_ID = "me.lehrner.spotifystreamer.track.id";
     public static final String KEY_PLAYLIST = "me.lehrner.spotifystreamer.playlist";
     public static final String KEY_NOTIFICATION_IMAGE = "me.lehrner.spotifystreamer.notification.image";
     public static final String KEY_ARTIST = "me.lehrner.spotifystreamer.artist";
+    public static final String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.artist.id";
     public static final String KEY_PROGRESS = "me.lehrner.spotifystreamer.progress";
 
     private static final int NO_TRACK = -1;
@@ -45,7 +49,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
     private PlayerState mPLayerState = PlayerState.IDLE;
     private NotificationCompat.Builder mNotificationBuilder;
     private RemoteViews mRemoteViews;
-    private String mArtist;
+    private String mArtist, mArtistId, mQuery;
     private boolean mNotForeground = true;
     private NotificationManager mNotificationManager;
 
@@ -184,6 +188,8 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                 int trackId = intent.getIntExtra(KEY_TRACK_ID, NO_TRACK);
                 ArrayList<SpotifyTrackSearchResult> playlist = intent.getParcelableArrayListExtra(KEY_PLAYLIST);
                 String artist = intent.getStringExtra(KEY_ARTIST);
+                String artistId = intent.getStringExtra(KEY_ARTIST_ID);
+                String query = intent.getStringExtra(MainActivity.KEY_QUERY);
 
                 if (artist != null) {
                     mArtist = artist;
@@ -194,6 +200,14 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                     mListSize = mPlayList.size();
                 }
 
+                if (artistId != null) {
+                    mArtistId = artistId;
+                }
+
+                if (query != null) {
+                    mQuery = query;
+                }
+
                 if (trackId == NO_TRACK) {
                     play();
                 }
@@ -201,6 +215,8 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                     play(trackId);
                     updateNotificationTrack = true;
                 }
+
+                setNotificationIntent();
                 break;
             case ACTION_START:
                 Log.d("Service.onStartCommand", "Service started");
@@ -215,6 +231,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                 updateNotificationTrack = true;
                 mNotificationBuilder.setOngoing(true);
                 previous();
+                setNotificationIntent();
                 break;
             case ACTION_NEXT:
                 Log.d("Service.onStartCommand", "Next");
@@ -222,6 +239,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                 updateNotificationTrack = true;
                 mNotificationBuilder.setOngoing(true);
                 next();
+                setNotificationIntent();
                 break;
             case ACTION_PAUSE:
                 if (mMediaPlayer.isPlaying()) {
@@ -286,34 +304,49 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
         showNotification();
     }
 
+    private void setNotificationIntent() {
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
+
+        // intent for main activity
+        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
+        notificationIntent.setAction(Intent.ACTION_SEARCH);
+        notificationIntent.putExtra(SearchManager.QUERY, mQuery);
+        stackBuilder.addNextIntent(notificationIntent);
+
+        // intent for top tracks
+        notificationIntent = new Intent(getApplicationContext(), TopTracks.class);
+        notificationIntent.putExtra(MainActivityFragment.ARTIST_ID, mArtistId);
+        notificationIntent.putExtra(MainActivityFragment.ARTIST_NAME, mArtist);
+        stackBuilder.addNextIntent(notificationIntent);
+
+        // intent for player
+        notificationIntent = new Intent(getApplicationContext(), PlayerActivity.class);
+        notificationIntent.setAction(ACTION_NOTIFICATION);
+        notificationIntent.putExtra(TopTracksFragment.ARRAY_ID, mTrackId);
+        notificationIntent.putExtra(TopTracksFragment.TRACK_ARRAY, mPlayList);
+        notificationIntent.putExtra(TopTracksFragment.ARTIST_NAME, mArtist);
+        stackBuilder.addNextIntent(notificationIntent);
+
+        PendingIntent pendingNotificationIntent = stackBuilder.getPendingIntent(
+                0,
+                PendingIntent.FLAG_UPDATE_CURRENT);
+
+        mRemoteViews.setOnClickPendingIntent(R.id.notification_trackname, pendingNotificationIntent);
+        mRemoteViews.setOnClickPendingIntent(R.id.notification_artist, pendingNotificationIntent);
+        mRemoteViews.setOnClickPendingIntent(R.id.notification_album, pendingNotificationIntent);
+        mRemoteViews.setOnClickPendingIntent(R.id.notification_content, pendingNotificationIntent);
+
+        mNotificationBuilder.setContent(mRemoteViews);
+        showNotification();
+    }
+
     private void createNotificationBuilder() {
-
-        //the intent that is started when the notification is clicked (works)
-        Intent notificationIntent = new Intent(this, PlayerActivity.class);
-        PendingIntent pendingNotificationIntent = PendingIntent.getActivity(this, 0,
-                notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
         mNotificationBuilder = new NotificationCompat.Builder(this)
                 .setSmallIcon(android.R.drawable.ic_media_play)
-                .setContentIntent(pendingNotificationIntent)
                 .setOngoing(true)
                 .setAutoCancel(true)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContent(mRemoteViews);
-
-//        notification.contentIntent = pendingNotificationIntent;
-//        notification.flags |= Notification.FLAG_NO_CLEAR;
-
-        //this is the intent that is supposed to be called when the
-        //button is clicked
-//        Intent switchIntent = new Intent(this, MediaPlayerService.class);
-//        PendingIntent pendingSwitchIntent = PendingIntent.getBroadcast(this, 0,
-//                switchIntent, 0);
-
-//        notificationView.setOnClickPendingIntent(R.id.closeOnFlash,
-//                pendingSwitchIntent);
-
-
     }
 
     private void updateNotificationTrack(String artist, String track, String albumUrl) {
@@ -419,6 +452,8 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
         mRemoteViews.setOnClickPendingIntent(R.id.notification_pause, pendingIntent);
 
         mRemoteViews.setOnClickPendingIntent(R.id.notification_play, getPlayPendingIntent());
+
+//        intent = new Intent(this, PlayerActivity.class)
     }
 
     public void onCompletion(MediaPlayer mediaPlayer) {

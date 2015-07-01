@@ -14,8 +14,7 @@ public class TopTracks extends AppCompatActivity {
     private final static String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.topTracks.ARTIST_ID";
 
     private TopTracksFragment mFragment;
-    private String mArtistName;
-    private String mArtistId;
+    private String mArtistName, mArtistId, mQuery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +28,7 @@ public class TopTracks extends AppCompatActivity {
 
             mArtistId = savedInstanceState.getString(KEY_ARTIST_ID);
             mArtistName = savedInstanceState.getString(KEY_ARTIST_NAME);
+            mQuery = savedInstanceState.getString(MainActivity.KEY_QUERY);
         }
         else {
             mFragment = (TopTracksFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_tracks);
@@ -54,11 +54,16 @@ public class TopTracks extends AppCompatActivity {
         return mArtistId;
     }
 
+    public String getQuery() {
+        return mQuery;
+    }
+
     private void handleIntent(Intent intent) {
         Log.d("handleIntent", "Action: " + intent.getAction());
 
         mArtistId = intent.getStringExtra(MainActivityFragment.ARTIST_ID);
         mArtistName = intent.getStringExtra(MainActivityFragment.ARTIST_NAME);
+        mQuery = intent.getStringExtra(MainActivity.KEY_QUERY);
     }
 
     @Override
@@ -70,6 +75,7 @@ public class TopTracks extends AppCompatActivity {
         getSupportFragmentManager().putFragment(outState, FRAGMENT, mFragment);
         outState.putString(KEY_ARTIST_NAME, mArtistName);
         outState.putString(KEY_ARTIST_ID, mArtistId);
+        outState.putString(MainActivity.KEY_QUERY, mQuery);
     }
 
     @Override
