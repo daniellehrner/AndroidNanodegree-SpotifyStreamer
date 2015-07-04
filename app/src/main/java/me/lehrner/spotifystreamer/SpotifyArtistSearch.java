@@ -70,14 +70,7 @@ class SpotifyArtistSearch {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (searchResult.isEmpty()) {
-                            fragment.showToast(fragment.getString(R.string.no_artist_found));
-                        }
-                        else {
-                            fragment.addAllAdapter(searchResult);
-                            fragment.saveLastSearchQuery();
-                        }
-                        fragment.fadeListViewIn();
+                        fragment.handleSearchResult(searchResult);
                     }
                 });
             }
@@ -88,10 +81,9 @@ class SpotifyArtistSearch {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        fragment.fadeListViewIn();
+                        fragment.handleConnectionError();
                     }
                 });
-                fragment.showToast(activity.getString(R.string.connection_error));
             }
         });
     }

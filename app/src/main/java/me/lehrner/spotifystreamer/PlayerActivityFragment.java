@@ -2,6 +2,7 @@ package me.lehrner.spotifystreamer;
 
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
@@ -98,8 +99,6 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
             mPlayerTimeStartView.setText(timeIntToString(mCurrentPosition));
         }
         else {
-//            mPlayerServiceIntent.setAction(MediaPlayerService.ACTION_START);
-//            mActivity.startService(mPlayerServiceIntent);
             mTracks = mActivity.getTracks();
             mArtistName = mActivity.getArtistName();
             mTrackId = mActivity.getTrackId();
@@ -126,14 +125,16 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
         Log.d("PlayerFragment.onStart", "Start");
         super.onStart();
 
+        startBindService();
+        mSeekBar.setOnSeekBarChangeListener(this);
+    }
+
+    private void startBindService() {
         mPlayerServiceIntent.setAction(MediaPlayerService.ACTION_START);
         mActivity.startService(mPlayerServiceIntent);
 
         mPlayerServiceIntent = new Intent(mActivity, MediaPlayerService.class);
-        mActivity.bindService(mPlayerServiceIntent, mConnection, 0);
-
-        startTimer();
-        mSeekBar.setOnSeekBarChangeListener(this);
+        mActivity.bindService(mPlayerServiceIntent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -157,6 +158,8 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
     }
 
     private void startTimer() {
+        Log.d("PlayerFragment.Timer", "Start");
+        stopTimer();
         createTimerTask();
 
         mTimer = new Timer();
@@ -165,9 +168,15 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
     }
 
     private void stopTimer() {
-        mTimer.cancel();
-        mTimer.purge();
-        mUpdateTrackStatus.cancel();
+        if (mTimer != null) {
+            Log.d("PlayerFragment.Timer", "Stop");
+            mTimer.cancel();
+            mTimer.purge();
+        }
+
+        if (mUpdateTrackStatus != null) {
+            mUpdateTrackStatus.cancel();
+        }
     }
 
     private void createTimerTask() {
@@ -277,6 +286,8 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
                         @Override
                         public void run() {
                             changePlayButton(getString(R.string.TAG_PLAY));
+                            mPlayerTimeStartView.setText(timeIntToString(mTrackDuration));
+                            mSeekBar.setProgress(mTrackDuration);
                         }
                     });
                 }
@@ -295,6 +306,7 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
             mBound = true;
 
             Log.d("onServiceConnected", "Bound");
+            startTimer();
 
             if (mPlayAfterConnected) {
                 Log.d("onServiceConnected", "Play");
@@ -304,9 +316,11 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName arg0) {
+        public void onServiceDisconnected(ComponentName name) {
             Log.d("onServiceConnected", "Unbound");
             mBound = false;
+            mPlayerService = null;
+            stopTimer();
         }
     };
 
@@ -379,6 +393,7 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
 
         mActivity.startService(mPlayerServiceIntent);
 
+        // remove extra in case play is called again
         mPlayerServiceIntent.removeExtra(MediaPlayerService.KEY_TRACK_ID);
     }
 
@@ -434,7 +449,6 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
 
         if (mBound) {
             mActivity.unbindService(mConnection);
-            mBound = false;
             Log.d("Player.onStop", "Unbound from Service");
         }
 

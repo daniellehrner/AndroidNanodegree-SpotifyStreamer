@@ -1,8 +1,6 @@
 package me.lehrner.spotifystreamer;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -10,11 +8,8 @@ import com.bumptech.glide.Glide;
 
 public class TopTracks extends AppCompatActivity {
     private static final String FRAGMENT = "me.lehrner.spotifystreamer.TopTracksFragment";
-    private final static String KEY_ARTIST_NAME = "me.lehrner.spotifystreamer.topTracks.ARTIST_NAME";
-    private final static String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.topTracks.ARTIST_ID";
 
     private TopTracksFragment mFragment;
-    private String mArtistName, mArtistId, mQuery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,45 +20,10 @@ public class TopTracks extends AppCompatActivity {
         if (savedInstanceState != null) {
             //Restore the fragment's instance
             mFragment = (TopTracksFragment) getSupportFragmentManager().getFragment(savedInstanceState, FRAGMENT);
-
-            mArtistId = savedInstanceState.getString(KEY_ARTIST_ID);
-            mArtistName = savedInstanceState.getString(KEY_ARTIST_NAME);
-            mQuery = savedInstanceState.getString(MainActivity.KEY_QUERY);
         }
         else {
             mFragment = (TopTracksFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_tracks);
-            handleIntent(getIntent());
         }
-
-        ActionBar actionBar = getSupportActionBar();
-
-        if (actionBar != null) {
-            Log.d("TopTracks.onCreate", "subtitle: " + mArtistName);
-            actionBar.setSubtitle(mArtistName);
-        }
-        else {
-            Log.e("TopTracks.onCreate", "Can't set actionbar subtitle");
-        }
-    }
-
-    public String getArtistName () {
-        return mArtistName;
-    }
-
-    public String getArtistId() {
-        return mArtistId;
-    }
-
-    public String getQuery() {
-        return mQuery;
-    }
-
-    private void handleIntent(Intent intent) {
-        Log.d("handleIntent", "Action: " + intent.getAction());
-
-        mArtistId = intent.getStringExtra(MainActivityFragment.ARTIST_ID);
-        mArtistName = intent.getStringExtra(MainActivityFragment.ARTIST_NAME);
-        mQuery = intent.getStringExtra(MainActivity.KEY_QUERY);
     }
 
     @Override
@@ -73,9 +33,11 @@ public class TopTracks extends AppCompatActivity {
 
         //Save the fragment's instance
         getSupportFragmentManager().putFragment(outState, FRAGMENT, mFragment);
-        outState.putString(KEY_ARTIST_NAME, mArtistName);
-        outState.putString(KEY_ARTIST_ID, mArtistId);
-        outState.putString(MainActivity.KEY_QUERY, mQuery);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
     @Override

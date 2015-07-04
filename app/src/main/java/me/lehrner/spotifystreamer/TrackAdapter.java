@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import java.util.ArrayList;
 import java.util.List;
 
 class TrackAdapter extends ArrayAdapter<SpotifyTrackSearchResult> {
@@ -22,6 +23,17 @@ class TrackAdapter extends ArrayAdapter<SpotifyTrackSearchResult> {
         mTrackList = artistList;
         mContext = context;
         mLayoutId = R.layout.top_tracks_item_layout;
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+
+        if (mTrackList != null) {
+            mTrackList.clear();
+        }
+
+        addAll(new ArrayList<SpotifyTrackSearchResult>());
     }
 
     public View getView(int position, View trackView, ViewGroup parent) {

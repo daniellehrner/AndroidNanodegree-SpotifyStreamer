@@ -16,6 +16,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import com.squareup.leakcanary.RefWatcher;
+
 import java.util.ArrayList;
 
 
@@ -489,7 +491,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
 
         mBinder.clear();
 
-//        RefWatcher refWatcher = SpotifyStreamerApplication.getRefWatcher(getApplication());
-//        refWatcher.watch(this);
+        RefWatcher refWatcher = SpotifyStreamerApplication.getRefWatcher(getApplication());
+        refWatcher.watch(this);
     }
 }

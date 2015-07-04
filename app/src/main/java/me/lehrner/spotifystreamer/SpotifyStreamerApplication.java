@@ -20,6 +20,7 @@ public class SpotifyStreamerApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        getPackageManager().getUserBadgedLabel("", android.os.Process.myUserHandle());
         refWatcher = LeakCanary.install(this);
     }
 }

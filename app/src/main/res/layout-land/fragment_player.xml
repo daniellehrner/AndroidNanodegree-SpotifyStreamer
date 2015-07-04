@@ -52,11 +52,11 @@
         android:layout_height="match_parent"
         android:src="@drawable/vinyl"
         android:contentDescription="@string/empty_image"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
         android:layout_above="@id/player_time_progress"
-        android:layout_toLeftOf="@id/player_button_layout"
-        android:layout_toStartOf="@id/player_button_layout"/>
+        android:layout_toLeftOf="@+id/player_button_layout"
+        android:layout_toStartOf="@+id/player_button_layout"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
     <TextView
         android:id="@+id/player_artist_name"

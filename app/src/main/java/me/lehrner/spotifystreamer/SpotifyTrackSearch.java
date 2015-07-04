@@ -1,5 +1,6 @@
 package me.lehrner.spotifystreamer;
 
+import android.app.Activity;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -27,12 +28,12 @@ class SpotifyTrackSearch {
         options.put("country", Locale.getDefault().getCountry());
     }
 
-    public void updateListView(String artistId, final TopTracks activity, final TopTracksFragment fragment) {
-        Log.d("TrackUpdateView", "Start ");
+    public void updateListView(String artistId, final Activity activity, final TopTracksFragment fragment) {
+        Log.d("updateListView", "Start ");
 
         final ArrayList<SpotifyTrackSearchResult> searchResult = new ArrayList<>();
 
-        Log.d("TrackUpdateView", "ArtistId = " + artistId);
+        Log.d("updateListView", "ArtistId = " + artistId);
 
         spotify.getArtistTopTrack(artistId, options, new Callback<Tracks>() {
             @Override
@@ -41,9 +42,9 @@ class SpotifyTrackSearch {
                     fragment.showToast(activity.getString(R.string.no_track_found));
 
                     if (pager == null)
-                        Log.e("TrackUpdateView", "pager is null");
+                        Log.e("updateListView", "pager is null");
                     else
-                        Log.e("TrackUpdateView", "pager.tracks is null");
+                        Log.e("updateListView", "pager.tracks is null");
                     return;
                 }
 
@@ -72,11 +73,11 @@ class SpotifyTrackSearch {
                             }
                         }
                         else {
-                            Log.e("TrackUpdateView", "track.album.images is null");
+                            Log.e("updateListView", "track.album.images is null");
                         }
                     }
                     else {
-                        Log.e("TrackUpdateView", "track.album is null");
+                        Log.e("updateListView", "track.album is null");
                     }
 
                     SpotifyTrackSearchResult newTrack = new SpotifyTrackSearchResult(trackName,
@@ -87,13 +88,7 @@ class SpotifyTrackSearch {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (searchResult.isEmpty()) {
-                            fragment.showToast(activity.getString(R.string.no_track_found));
-                            activity.finish();
-                        } else {
-                            fragment.addAllAdapter(searchResult);
-                            fragment.fadeListViewIn();
-                        }
+                        fragment.getSearchResult(searchResult);
                     }
                 });
             }
@@ -105,10 +100,9 @@ class SpotifyTrackSearch {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        fragment.fadeListViewIn();
+                        fragment.handleSearchError();
                     }
                 });
-                fragment.showToast(activity.getString(R.string.connection_error));
             }
         });
     }

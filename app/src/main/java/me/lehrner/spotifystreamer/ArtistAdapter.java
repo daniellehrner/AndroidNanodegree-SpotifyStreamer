@@ -27,10 +27,12 @@ class ArtistAdapter extends ArrayAdapter<SpotifyArtistSearchResult> {
 
     @Override
     public void clear() {
+        super.clear();
+
         if (mArtistList != null) {
             mArtistList.clear();
         }
-        super.clear();
+
         addAll(new ArrayList<SpotifyArtistSearchResult>());
     }
 

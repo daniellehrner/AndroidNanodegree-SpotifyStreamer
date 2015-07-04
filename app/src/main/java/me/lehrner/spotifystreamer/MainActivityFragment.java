@@ -38,7 +38,7 @@ public class MainActivityFragment extends Fragment {
     private Toast toast;
     private Context mContext;
     private MainActivity mActivity;
-    private String mLastArtist;
+    private String mLastArtist, mCurrentArtist;
 
     public MainActivityFragment() {
     }
@@ -78,11 +78,18 @@ public class MainActivityFragment extends Fragment {
             public void onItemClick(AdapterView<?> adapter, View v, int position, long rowId) {
                 SpotifyArtistSearchResult clickedItem = (SpotifyArtistSearchResult) adapter.getItemAtPosition(position);
 
-                Intent topTracksIntent = new Intent(mContext, TopTracks.class);
-                topTracksIntent.putExtra(ARTIST_NAME, clickedItem.getArtistName());
-                topTracksIntent.putExtra(ARTIST_ID, clickedItem.getArtistId());
-                topTracksIntent.putExtra(MainActivity.KEY_QUERY, mActivity.getQuery());
-                startActivity(topTracksIntent);
+                if (mActivity.isTwoPane()) {
+                    mActivity.getTopTracksFragment().updateTopTracks(clickedItem.getArtistId(),
+                            clickedItem.getArtistName(),
+                            mActivity);
+                }
+                else {
+                    Intent topTracksIntent = new Intent(mContext, TopTracks.class);
+                    topTracksIntent.putExtra(ARTIST_NAME, clickedItem.getArtistName());
+                    topTracksIntent.putExtra(ARTIST_ID, clickedItem.getArtistId());
+                    topTracksIntent.putExtra(MainActivity.KEY_QUERY, mActivity.getQuery());
+                    startActivity(topTracksIntent);
+                }
             }
         });
 
@@ -101,22 +108,42 @@ public class MainActivityFragment extends Fragment {
         addAllAdapter(artistsListTemp);
     }
 
+    public void handleConnectionError() {
+        showToast(mActivity.getString(R.string.connection_error));
+        fadeListViewIn();
+    }
+
+    public void handleSearchResult(ArrayList<SpotifyArtistSearchResult> searchResult) {
+        if (searchResult.isEmpty()) {
+            showToast(getString(R.string.no_artist_found));
+        }
+        else {
+            addAllAdapter(searchResult);
+            saveLastSearchQuery();
+            mActivity.getTopTracksFragment().hideListView();
+        }
+        fadeListViewIn();
+    }
+
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         mActivity = (MainActivity) activity;
     }
 
-    public void addAllAdapter(ArrayList<SpotifyArtistSearchResult> searchResult) {
+    private void addAllAdapter(ArrayList<SpotifyArtistSearchResult> searchResult) {
         mArtists = searchResult;
         mAdapter.addAll(searchResult);
     }
 
-    public void saveLastSearchQuery () {
+    private void saveLastSearchQuery() {
+        // save last artist only when search was successful
+        mLastArtist = mCurrentArtist;
+
         Log.d("saveLastSearchQuery", "saving: " + mLastArtist);
         SearchRecentSuggestions suggestions = new SearchRecentSuggestions(mContext,
                 ArtistSuggestionProvider.AUTHORITY, ArtistSuggestionProvider.MODE);
-        suggestions.saveRecentQuery(mLastArtist, null);
+        suggestions.saveRecentQuery(mLastArtist.trim().toLowerCase(), null);
     }
 
     public void updateArtistView(String artist) {
@@ -131,7 +158,8 @@ public class MainActivityFragment extends Fragment {
             mSearchView.clearFocus();
         }
 
-        mLastArtist = artist;
+        // save artist temporarily
+        mCurrentArtist = artist;
 
         fadeListViewOut();
 
@@ -140,6 +168,8 @@ public class MainActivityFragment extends Fragment {
             mListView.setAdapter(mAdapter);
             mArtists.clear();
         }
+
+        mActivity.getTopTracksFragment().setSubTitle(" ");
 
         SpotifyArtistSearch spotifySearch = new SpotifyArtistSearch();
         spotifySearch.updateListView(artist, mActivity, this);
@@ -150,7 +180,7 @@ public class MainActivityFragment extends Fragment {
         toast.show();
     }
 
-    public void fadeListViewIn() {
+    private void fadeListViewIn() {
         if (mListView != null) {
             // Set the content view to 0% opacity but visible, so that it is visible
             // (but fully transparent) during the animation.

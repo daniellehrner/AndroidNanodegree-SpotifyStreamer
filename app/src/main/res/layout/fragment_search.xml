@@ -13,11 +13,13 @@
 
     <ListView
         android:id="@+id/listview_search_result"
+        android:choiceMode="singleChoice"
+        android:listSelector="@android:drawable/list_selector_background"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:layout_below="@id/search_text"/>
+        android:layout_below="@+id/search_text"/>
 
     <ProgressBar android:id="@+id/loading_spinner_artist"
         style="?android:progressBarStyleLarge"
