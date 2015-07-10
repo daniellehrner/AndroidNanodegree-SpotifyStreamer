@@ -5,7 +5,7 @@
     android:baselineAligned="false"
     android:divider="?android:attr/dividerHorizontal"
     android:orientation="horizontal"
-    tools:context="com.example.android.sunshine.app.MainActivity">
+    tools:context="me.lehrner.spotifystreamer.MainActivity">
 
     <fragment
         android:id="@+id/fragment_search"

@@ -6,15 +6,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.SearchView;
 
 import com.bumptech.glide.Glide;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.ArrayList;
+
+public class MainActivity extends AppCompatActivity implements  PlayerActivityFragment.OnTrackSelectedListener,
+                                                                AdapterView.OnItemClickListener  {
     private static final String MAIN_FRAGMENT_NAME = "MainActivityFragment";
     private static final String TOP_TRACKS_FRAGMENT_NAME = "TopTracksFragment";
     public static final String KEY_QUERY = "me.lehrner.spotifystreamer.key.query";
@@ -23,10 +29,8 @@ public class MainActivity extends AppCompatActivity {
     private TopTracksFragment mTopTracksFragment;
     private boolean mTwoPane;
     private String mQuery;
-
-    public String getQuery() {
-        return mQuery;
-    }
+    private int mTrackId;
+    private boolean mIsNotificationIntent = false;
 
     public boolean isTwoPane() {
         return mTwoPane;
@@ -34,6 +38,46 @@ public class MainActivity extends AppCompatActivity {
 
     public TopTracksFragment getTopTracksFragment() {
         return mTopTracksFragment;
+    }
+
+    public boolean getIsNotificationIntent() {
+        return mIsNotificationIntent;
+    }
+
+    public String getArtistName() {
+        return mTopTracksFragment.getArtistName();
+    }
+
+    public ArrayList<SpotifyTrackSearchResult> getTracks() {
+        return mTopTracksFragment.getTracks();
+    }
+
+    public int getTrackId() {
+        return mTrackId;
+    }
+
+    public String getArtistId() {
+        return mTopTracksFragment.getArtistId();
+    }
+
+    public String getQuery() {
+        return mQuery;
+    }
+
+    public void onItemClick(AdapterView<?> adapter, View v, int position, long rowId) {
+        SpotifyTrackSearchResult clickedItem = (SpotifyTrackSearchResult) adapter.getItemAtPosition(position);
+
+        mTrackId = getTracks().indexOf(clickedItem);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        PlayerActivityFragment newFragment = new PlayerActivityFragment();
+
+        if (getTrackId() == -1) {
+            Log.e("TopTracks.click", "clicked item not found: " + clickedItem.toString());
+            finish();
+        }
+
+        newFragment.show(fragmentManager, "dialog");
     }
 
     @Override
@@ -59,15 +103,11 @@ public class MainActivity extends AppCompatActivity {
             mQuery = savedInstanceState.getString(KEY_QUERY);
         }
 
-        if (findViewById(R.id.fragment_tracks_container) != null) {
+        mTwoPane = getResources().getBoolean(R.bool.two_pane);
+
+        if (mTwoPane) {
             Log.d("Main.onCreate", "Two-pane mode");
-            // The detail container view will be present only in the large-screen layouts
-            // (res/layout-sw600dp). If this view is present, then the activity should be
-            // in two-pane mode.
-            mTwoPane = true;
-            // In two-pane mode, show the detail view in this activity by
-            // adding or replacing the detail fragment using a
-            // fragment transaction.
+
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment_tracks_container, new TopTracksFragment(), DETAIL_FRAGMENT_TAG)
@@ -77,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
         }
         else {
             Log.d("Main.onCreate", "Single-pane mode");
-            mTwoPane = false;
         }
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);

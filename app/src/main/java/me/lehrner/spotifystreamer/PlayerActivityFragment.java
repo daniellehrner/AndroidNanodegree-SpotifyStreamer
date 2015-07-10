@@ -1,17 +1,20 @@
 package me.lehrner.spotifystreamer;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -25,7 +28,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBarChangeListener {
+public class PlayerActivityFragment extends DialogFragment implements SeekBar.OnSeekBarChangeListener {
     private static final String KEY_TRACKS = "me.lehrner.spotifystreamer.tracks";
     private static final String KEY_ARTIST = "me.lehrner.spotifystreamer.artist";
     private static final String KEY_TAG = "me.lehrner.spotifystreamer.tag";
@@ -35,7 +38,7 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
 
     private static final int DELAY = 200, PERIOD = 200;
 
-    private PlayerActivity mActivity;
+    private Activity mActivity;
     private TextView mArtistNameView, mAlbumNameView, mTrackNameView, mPlayerTimeStartView, mPlayerTimeEndView;
     private ImageView mPlayerImage;
     private ArrayList<SpotifyTrackSearchResult> mTracks;
@@ -50,15 +53,34 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
     private SeekBar mSeekBar;
     private Timer mTimer;
     private TimerTask mUpdateTrackStatus;
+    private OnTrackSelectedListener mTrackListener;
 
     public PlayerActivityFragment() {
     }
+
+    public interface OnTrackSelectedListener {
+        boolean getIsNotificationIntent();
+        String getArtistName();
+        ArrayList<SpotifyTrackSearchResult> getTracks();
+        int getTrackId();
+        String getArtistId();
+        String getQuery();
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.fragment_player, container, false);
         return mRootView;
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        return dialog;
     }
 
     private String timeIntToString(int timeMs) {
@@ -99,12 +121,12 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
             mPlayerTimeStartView.setText(timeIntToString(mCurrentPosition));
         }
         else {
-            mTracks = mActivity.getTracks();
-            mArtistName = mActivity.getArtistName();
-            mTrackId = mActivity.getTrackId();
+            mTracks = mTrackListener.getTracks();
+            mArtistName = mTrackListener.getArtistName();
+            mTrackId = mTrackListener.getTrackId();
 
             newTrack = true;
-            autoStart = !mActivity.getIsNotificationIntent();
+            autoStart = !mTrackListener.getIsNotificationIntent();
         }
 
         setTrack(mTrackId, newTrack);
@@ -388,8 +410,8 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
         mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_TRACK_ID, trackId);
         mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_PLAYLIST, mTracks);
         mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_ARTIST, mArtistName);
-        mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_ARTIST_ID, mActivity.getArtistId());
-        mPlayerServiceIntent.putExtra(MainActivity.KEY_QUERY, mActivity.getQuery());
+        mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_ARTIST_ID, mTrackListener.getArtistId());
+        mPlayerServiceIntent.putExtra(MainActivity.KEY_QUERY, mTrackListener.getQuery());
 
         mActivity.startService(mPlayerServiceIntent);
 
@@ -440,7 +462,13 @@ public class PlayerActivityFragment extends Fragment implements SeekBar.OnSeekBa
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        mActivity = (PlayerActivity) activity;
+        mActivity = activity;
+
+        try {
+            mTrackListener = (OnTrackSelectedListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnTrackSelectedListener");
+        }
     }
 
     @Override

@@ -3,6 +3,8 @@ package me.lehrner.spotifystreamer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -11,8 +13,9 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 
-public class PlayerActivity extends AppCompatActivity {
+public class PlayerActivity extends AppCompatActivity implements PlayerActivityFragment.OnTrackSelectedListener {
     private static final String FRAGMENT = "me.lehrner.spotifystreamer.PlayerActivityFragment";
+    private static final String PLAYER_FRAGMENT_TAG = "PLAYER_FRAGMENT_TAG";
 
     private static final String KEY_TRACKS = "me.lehrner.spotifystreamer.tracks";
     private static final String KEY_ARTIST = "me.lehrner.spotifystreamer.artist";
@@ -84,6 +87,21 @@ public class PlayerActivity extends AppCompatActivity {
             mArtistId = savedInstanceState.getString(KEY_ARTIST_ID);
             mQuery = savedInstanceState.getString(MainActivity.KEY_QUERY);
         } else {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            PlayerActivityFragment newFragment = new PlayerActivityFragment();
+            boolean twoPane = getResources().getBoolean(R.bool.two_pane);
+
+            if (twoPane) {
+                newFragment.show(fragmentManager, "dialog");
+            }
+            else {
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                transaction.add(R.id.player_placeholder, newFragment, PLAYER_FRAGMENT_TAG)
+                        .addToBackStack(null)
+                        .commit();
+            }
+
             handleIntent(getIntent());
         }
     }

@@ -28,6 +28,7 @@ public class MainActivityFragment extends Fragment {
     public final static String ARTIST_NAME = "me.lehrner.spotifystreamer.ARTIST_NAME";
     public final static String ARTIST_ID = "me.lehrner.spotifystreamer.ARTIST_ID";
     private final static String KEY_LAST_ARTIST = "me.lehrner.spotifystreamer.lastArtist";
+    private final static String KEY_LIST_POSITION = "me.lehrner.spotifystreamer.position";
 
     private ArtistAdapter mAdapter;
     private ArrayList<SpotifyArtistSearchResult> mArtists;
@@ -100,6 +101,11 @@ public class MainActivityFragment extends Fragment {
             artistsListTemp = savedInstanceState.getParcelableArrayList(KEY_ARTIST_LIST);
             mListView.onRestoreInstanceState(savedInstanceState.getParcelable(KEY_LIST_VIEW));
             mLastArtist = savedInstanceState.getString(KEY_LAST_ARTIST);
+
+            // not needed on phones
+            if (mActivity.isTwoPane()) {
+                mListView.smoothScrollToPosition(savedInstanceState.getInt(KEY_LIST_POSITION));
+            }
         }
         else {
             artistsListTemp = new ArrayList<>();
@@ -120,7 +126,9 @@ public class MainActivityFragment extends Fragment {
         else {
             addAllAdapter(searchResult);
             saveLastSearchQuery();
-            mActivity.getTopTracksFragment().hideListView();
+            if (mActivity.isTwoPane()) {
+                mActivity.getTopTracksFragment().hideListView();
+            }
         }
         fadeListViewIn();
     }
@@ -153,7 +161,7 @@ public class MainActivityFragment extends Fragment {
             return;
         }
 
-        if (mSearchView.getQuery().length() == 0) {
+        if (!mSearchView.getQuery().equals(artist)) {
             mSearchView.setQuery(artist, false);
             mSearchView.clearFocus();
         }
@@ -169,7 +177,9 @@ public class MainActivityFragment extends Fragment {
             mArtists.clear();
         }
 
-        mActivity.getTopTracksFragment().setSubTitle(" ");
+        if (mActivity.isTwoPane()) {
+            mActivity.getTopTracksFragment().setSubTitle(" ");
+        }
 
         SpotifyArtistSearch spotifySearch = new SpotifyArtistSearch();
         spotifySearch.updateListView(artist, mActivity, this);
@@ -223,6 +233,8 @@ public class MainActivityFragment extends Fragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
         outState.putParcelableArrayList(KEY_ARTIST_LIST, mArtists);
         outState.putParcelable(KEY_LIST_VIEW, mListView.onSaveInstanceState());
 
@@ -233,7 +245,7 @@ public class MainActivityFragment extends Fragment {
             outState.putString(KEY_LAST_ARTIST, " ");
         }
 
-        super.onSaveInstanceState(outState);
+        outState.putInt(KEY_LIST_POSITION, mListView.getCheckedItemPosition());
     }
 
     @Override

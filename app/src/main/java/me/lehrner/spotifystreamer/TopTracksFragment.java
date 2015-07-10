@@ -21,7 +21,7 @@ import com.squareup.leakcanary.RefWatcher;
 
 import java.util.ArrayList;
 
-public class TopTracksFragment extends Fragment {
+public class TopTracksFragment extends Fragment  {
     private static final String KEY_TRACK_LIST = "me.lehrner.spotifystreamer.tracks";
     private static final String KEY_LIST_VIEW = "me.lehrner.spotifystreamer.track.listview";
     private final static String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.track.artistId";
@@ -39,10 +39,26 @@ public class TopTracksFragment extends Fragment {
     private Toast toast;
     private TrackAdapter mTrackAdapter;
     private Activity mActivity;
-    private Context mContext;
     private String mArtistId, mQuery, mArtistName;
+    private AdapterView.OnItemClickListener mClickListener;
 
     public TopTracksFragment() {
+    }
+
+    public String getArtistName() {
+        return mArtistName;
+    }
+
+    public ArrayList<SpotifyTrackSearchResult> getTracks() {
+        return mTracks;
+    }
+
+    public String getArtistId() {
+        return mArtistId;
+    }
+
+    public String getQuery() {
+        return mQuery;
     }
 
     @Override
@@ -62,11 +78,11 @@ public class TopTracksFragment extends Fragment {
         // Retrieve and cache the system's default "short" animation time.
         mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
 
-        mContext = getActivity();
-        toast = Toast.makeText(mContext, " ", Toast.LENGTH_SHORT);
+        Context context = getActivity();
+        toast = Toast.makeText(context, " ", Toast.LENGTH_SHORT);
 
         mTrackAdapter = new TrackAdapter(
-                mContext,
+                context,
                 new ArrayList<SpotifyTrackSearchResult>());
 
         mListView = (ListView) mRootView.findViewById(R.id.listview_track_search_result);
@@ -94,27 +110,7 @@ public class TopTracksFragment extends Fragment {
             }
         }
 
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapter, View v, int position, long rowId) {
-                SpotifyTrackSearchResult clickedItem = (SpotifyTrackSearchResult) adapter.getItemAtPosition(position);
-
-                int arrayPos = mTracks.indexOf(clickedItem);
-
-                if (arrayPos == -1) {
-                    Log.e("TopTracks.click", "clicked item not found: " + clickedItem.toString());
-                    mActivity.finish();
-                }
-
-                Intent playerIntent = new Intent(mContext, PlayerActivity.class);
-                playerIntent.putExtra(ARTIST_NAME, mArtistName);
-                playerIntent.putExtra(ARRAY_ID, arrayPos);
-                playerIntent.putParcelableArrayListExtra(TRACK_ARRAY, mTracks);
-                playerIntent.putExtra(ARTIST_ID, mArtistId);
-                playerIntent.putExtra(MainActivity.KEY_QUERY, mQuery);
-                startActivity(playerIntent);
-            }
-        });
+        mListView.setOnItemClickListener(mClickListener);
     }
 
     public void updateTopTracks(String artistId, String artistName, Activity activity) {
@@ -185,6 +181,12 @@ public class TopTracksFragment extends Fragment {
         super.onAttach(activity);
 
         mActivity = activity;
+
+        try {
+            mClickListener = (AdapterView.OnItemClickListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement AdapterView.OnItemClickListener");
+        }
     }
 
     public void showToast(String message) {
@@ -194,8 +196,11 @@ public class TopTracksFragment extends Fragment {
 
     private void addAllAdapter(ArrayList<SpotifyTrackSearchResult> searchResult) {
         Log.d("TopTracks.addAllAdapter", "Start");
-        mTracks = searchResult;
-        mTrackAdapter.addAll(mTracks);
+
+        if (searchResult != null) {
+            mTracks = searchResult;
+            mTrackAdapter.addAll(mTracks);
+        }
     }
 
     private void fadeListViewIn() {

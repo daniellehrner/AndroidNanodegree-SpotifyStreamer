@@ -6,15 +6,6 @@
     android:padding="@dimen/activity_horizontal_margin"
     tools:context="me.lehrner.spotifystreamer.PlayerActivityFragment">
 
-  <!--  <Switch
-        android:id="@+id/player_toggle_autoplay"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textOn="Autoplay"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true" />-->
-
     <TextView
         android:id="@+id/player_artist_name"
         android:singleLine="true"
