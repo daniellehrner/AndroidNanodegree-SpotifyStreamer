@@ -64,7 +64,7 @@
         android:tag="@string/TAG_PAUSE"
         android:contentDescription="@string/button_play"
         android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
         android:onClick="buttonPlay"
         style="?android:attr/borderlessButtonStyle"/>
 

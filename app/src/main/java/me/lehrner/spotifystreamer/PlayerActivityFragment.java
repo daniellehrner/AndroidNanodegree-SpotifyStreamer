@@ -10,7 +10,6 @@ import android.os.IBinder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,7 +20,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.squareup.leakcanary.RefWatcher;
 
 import java.util.ArrayList;
 import java.util.Timer;
@@ -39,7 +37,8 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
     private static final int DELAY = 200, PERIOD = 200;
 
     private Activity mActivity;
-    private TextView mArtistNameView, mAlbumNameView, mTrackNameView, mPlayerTimeStartView, mPlayerTimeEndView;
+    private TextView mArtistNameView, mAlbumNameView, mTrackNameView,
+            mPlayerTimeStartView, mPlayerTimeEndView;
     private ImageView mPlayerImage;
     private ArrayList<SpotifyTrackSearchResult> mTracks;
     private ImageButton mPlayButton;
@@ -54,6 +53,7 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
     private Timer mTimer;
     private TimerTask mUpdateTrackStatus;
     private OnTrackSelectedListener mTrackListener;
+    private MediaPlayerBinder mBinder;
 
     public PlayerActivityFragment() {
     }
@@ -65,6 +65,7 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
         int getTrackId();
         String getArtistId();
         String getQuery();
+        void setShareIntentUrl(String url);
     }
 
 
@@ -85,9 +86,9 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
 
     private String timeIntToString(int timeMs) {
         return String.format("%d:%02d",
-                TimeUnit.MILLISECONDS.toMinutes(timeMs),
-                TimeUnit.MILLISECONDS.toSeconds(timeMs) -
-                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(timeMs))
+            TimeUnit.MILLISECONDS.toMinutes(timeMs),
+            TimeUnit.MILLISECONDS.toSeconds(timeMs) -
+            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(timeMs))
         );
     }
 
@@ -144,7 +145,7 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
 
     @Override
     public void onStart() {
-        Log.d("PlayerFragment.onStart", "Start");
+        Logfn.d("Start");
         super.onStart();
 
         startBindService();
@@ -180,7 +181,7 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
     }
 
     private void startTimer() {
-        Log.d("PlayerFragment.Timer", "Start");
+        Logfn.d("Start");
         stopTimer();
         createTimerTask();
 
@@ -191,7 +192,7 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
 
     private void stopTimer() {
         if (mTimer != null) {
-            Log.d("PlayerFragment.Timer", "Stop");
+            Logfn.d("Stop");
             mTimer.cancel();
             mTimer.purge();
         }
@@ -205,6 +206,11 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
         mUpdateTrackStatus = new TimerTask() {
             public void run() {
                 if (!mBound) {
+                    return;
+                }
+
+                if (mPlayerService == null) {
+                    Logfn.e("mPlayerService is null");
                     return;
                 }
 
@@ -279,7 +285,7 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
                         });
 
                         mLastTrackDuration = mTrackDuration;
-                        Log.d("Player.Timer", "Setting duration to: " + mTrackDuration);
+                        Logfn.d("Setting duration to: " + mTrackDuration);
                     }
 
                     mCurrentPosition = mPlayerService.getCurrentPosition();
@@ -320,18 +326,17 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
     private final ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
+        public void onServiceConnected(ComponentName className, IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
-            MediaPlayerBinder mBinder = (MediaPlayerBinder) service;
+            mBinder = (MediaPlayerBinder) service;
             mPlayerService = mBinder.getService();
             mBound = true;
 
-            Log.d("onServiceConnected", "Bound");
+            Logfn.d("Bound");
             startTimer();
 
             if (mPlayAfterConnected) {
-                Log.d("onServiceConnected", "Play");
+                Logfn.d("Play");
                 playTrack(mTrackId);
                 mPlayAfterConnected = false;
             }
@@ -339,9 +344,10 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            Log.d("onServiceConnected", "Unbound");
+            Logfn.d("Unbound");
             mBound = false;
             mPlayerService = null;
+//            mBinder.clear();
             stopTimer();
         }
     };
@@ -350,6 +356,8 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
         mTrackId = id;
         SpotifyTrackSearchResult track = mTracks.get(mTrackId);
         String albumName = track.getAlbumName();
+
+        mTrackListener.setShareIntentUrl(track.getTrackUrl());
 
         mArtistNameView.setText(mArtistName);
         mAlbumNameView.setText(albumName);
@@ -390,21 +398,21 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
 
     public void playPauseTrack(String buttonTag) {
         if (buttonTag.equals(getString(R.string.TAG_PLAY))) {
-            Log.d("playPauseTrack", "Button play");
+            Logfn.d("Button play");
             sendMediaPlayerIntent(MediaPlayerService.ACTION_PLAY);
         }
         else if (buttonTag.equals(getString(R.string.TAG_PAUSE))) {
-            Log.d("playPauseTrack", "Button pause");
+            Logfn.d("Button pause");
             sendMediaPlayerIntent(MediaPlayerService.ACTION_PAUSE);
         }
         else {
-            Log.e("playPauseTrack", "Invalid button tag: " + buttonTag);
+            Logfn.e("Invalid button tag: " + buttonTag);
             mActivity.finish();
         }
     }
 
     private void playTrack(int trackId) {
-        Log.d("playTrack", "Starting track with id" + trackId);
+        Logfn.d("Starting track with id " + trackId);
 
         mPlayerServiceIntent.setAction(MediaPlayerService.ACTION_PLAY);
         mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_TRACK_ID, trackId);
@@ -453,7 +461,7 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
             mPlayButton.setTag(getString(R.string.TAG_PAUSE));
         }
         else {
-            Log.e("changePlayButton", "Invalid button tag: " + buttonTag);
+            Logfn.e("Invalid button tag: " + buttonTag);
             mActivity.finish();
         }
     }
@@ -477,7 +485,8 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
 
         if (mBound) {
             mActivity.unbindService(mConnection);
-            Log.d("Player.onStop", "Unbound from Service");
+            Logfn.d("Unbound from Service");
+//            mBinder.clear();
         }
 
         stopTimer();
@@ -493,12 +502,5 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
         outState.putInt(KEY_DURATION, mTrackDuration);
         outState.putInt(KEY_CURRENT_POSITION, mCurrentPosition);
         outState.putInt(KEY_TRACK_ID, mTrackId);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        RefWatcher refWatcher = SpotifyStreamerApplication.getRefWatcher(mActivity);
-        refWatcher.watch(this);
     }
 }

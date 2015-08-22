@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.bumptech.glide.Glide;
 
@@ -23,7 +22,7 @@ class BitmapHelper extends AsyncTask<String, Integer, Long> {
                 final float scale = mContext.getResources().getDisplayMetrics().density;
                 final int imageSizePx = (int) (IMAGE_SIZE_DP * scale + 0.5f);
 
-                Log.d("BitmapHelper.Background", "Loading image " + url + " with size: " + imageSizePx);
+                Logfn.d("Loading image " + url + " with size: " + imageSizePx);
 
                 mBitmap = Glide
                         .with(mContext)
@@ -32,7 +31,7 @@ class BitmapHelper extends AsyncTask<String, Integer, Long> {
                         .into(imageSizePx, imageSizePx)
                         .get();
             } catch (final Exception e) {
-                Log.e("BitmapHelper.Background", e.getMessage());
+                Logfn.e(e.getMessage());
             }
         }
         return 0l;
@@ -40,7 +39,7 @@ class BitmapHelper extends AsyncTask<String, Integer, Long> {
 
     protected void onPostExecute(Long notUsed) {
         if (mBitmap != null) {
-            Log.d("BitmapHelper.onPost", "Image loaded");
+            Logfn.d("Image loaded");
 
             Intent notificationImageIntent = new Intent(mContext, MediaPlayerService.class);
             notificationImageIntent.setAction(MediaPlayerService.ACTION_SET_IMAGE);
@@ -49,7 +48,7 @@ class BitmapHelper extends AsyncTask<String, Integer, Long> {
             mContext.startService(notificationImageIntent);
         }
         else {
-            Log.e("BitmapHelper.onPost", "Image not loaded");
+            Logfn.e("Image not loaded");
         }
     }
 }

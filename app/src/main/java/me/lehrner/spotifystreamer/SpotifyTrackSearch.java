@@ -1,7 +1,6 @@
 package me.lehrner.spotifystreamer;
 
 import android.app.Activity;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,11 +28,11 @@ class SpotifyTrackSearch {
     }
 
     public void updateListView(String artistId, final Activity activity, final TopTracksFragment fragment) {
-        Log.d("updateListView", "Start ");
+        Logfn.d("Start");
 
         final ArrayList<SpotifyTrackSearchResult> searchResult = new ArrayList<>();
 
-        Log.d("updateListView", "ArtistId = " + artistId);
+        Logfn.d("ArtistId = " + artistId);
 
         spotify.getArtistTopTrack(artistId, options, new Callback<Tracks>() {
             @Override
@@ -42,21 +41,18 @@ class SpotifyTrackSearch {
                     fragment.showToast(activity.getString(R.string.no_track_found));
 
                     if (pager == null)
-                        Log.e("updateListView", "pager is null");
+                        Logfn.e("pager is null");
                     else
-                        Log.e("updateListView", "pager.tracks is null");
+                        Logfn.e("pager.tracks is null");
                     return;
                 }
 
-                for (int i = 0; i < pager.tracks.size(); i++) {
+                for (int i = 0; i < pager.tracks.size(); ++i) {
                     Track track = pager.tracks.get(i);
 
                     String trackName = track.name;
                     String trackUrl = track.preview_url;
                     String albumName = "", imageUrlMedium = "", imageUrlBig = "";
-
-                    //String artistImageMedium = artist.images.s;
-                    //Log.d("SpotifyArtistSearch.do", "Artist = " + artistName + " (" + artistId);
 
                     if (track.album != null) {
                         albumName = track.album.name;
@@ -73,11 +69,11 @@ class SpotifyTrackSearch {
                             }
                         }
                         else {
-                            Log.e("updateListView", "track.album.images is null");
+                            Logfn.e("track.album.images is null");
                         }
                     }
                     else {
-                        Log.e("updateListView", "track.album is null");
+                        Logfn.e("track.album is null");
                     }
 
                     SpotifyTrackSearchResult newTrack = new SpotifyTrackSearchResult(trackName,
@@ -95,7 +91,7 @@ class SpotifyTrackSearch {
 
             @Override
             public void failure(RetrofitError error) {
-                Log.e("SpotifyArtistSearch.do", "Error: " + error.toString());
+                Logfn.e("Error: " + error.toString());
 
                 activity.runOnUiThread(new Runnable() {
                     @Override

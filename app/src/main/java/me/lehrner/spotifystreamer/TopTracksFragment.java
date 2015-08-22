@@ -9,15 +9,12 @@ import android.content.Intent;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
-
-import com.squareup.leakcanary.RefWatcher;
 
 import java.util.ArrayList;
 
@@ -89,7 +86,7 @@ public class TopTracksFragment extends Fragment  {
         mListView.setAdapter(mTrackAdapter);
 
         if (savedInstanceState != null) {
-            Log.d("TrackOnActivityCreated", "is a saved instance");
+            Logfn.d("is a saved instance");
 
             mTracks = savedInstanceState.getParcelableArrayList(KEY_TRACK_LIST);
             mListView.onRestoreInstanceState(savedInstanceState.getParcelable(KEY_LIST_VIEW));
@@ -102,7 +99,7 @@ public class TopTracksFragment extends Fragment  {
 
         }
         else {
-            Log.d("TrackOnActivityCreated", "is not  a saved instance");
+            Logfn.d("is not  a saved instance");
             Intent intent = mActivity.getIntent();
 
             if ((intent != null) && (intent.getExtras() != null)) {
@@ -135,7 +132,7 @@ public class TopTracksFragment extends Fragment  {
             ((AppCompatActivity) mActivity).getSupportActionBar().setSubtitle(subtitle);
         }
         catch (NullPointerException e) {
-            Log.e("updateTopTracks", "Can't set subtitle");
+            Logfn.e("Can't set subtitle");
         }
     }
 
@@ -195,7 +192,7 @@ public class TopTracksFragment extends Fragment  {
     }
 
     private void addAllAdapter(ArrayList<SpotifyTrackSearchResult> searchResult) {
-        Log.d("TopTracks.addAllAdapter", "Start");
+        Logfn.d("Start");
 
         if (searchResult != null) {
             mTracks = searchResult;
@@ -204,7 +201,7 @@ public class TopTracksFragment extends Fragment  {
     }
 
     private void fadeListViewIn() {
-        Log.d("TopTracks.fadeListView", "Start");
+        Logfn.d("Start");
         // Set the content view to 0% opacity but visible, so that it is visible
         // (but fully transparent) during the animation.
         mListView.setAlpha(0f);
@@ -252,12 +249,5 @@ public class TopTracksFragment extends Fragment  {
         outState.putString(KEY_ARTIST_ID, mArtistId);
         outState.putString(KEY_ARTIST_NAME, mArtistName);
         outState.putString(MainActivity.KEY_QUERY, mQuery);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        RefWatcher refWatcher = SpotifyStreamerApplication.getRefWatcher(mActivity);
-        refWatcher.watch(this);
     }
 }

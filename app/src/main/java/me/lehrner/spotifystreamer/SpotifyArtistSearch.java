@@ -1,7 +1,5 @@
 package me.lehrner.spotifystreamer;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
@@ -22,11 +20,11 @@ class SpotifyArtistSearch {
     }
 
     public void updateListView(final String artist, final MainActivity activity, final MainActivityFragment fragment) {
-        Log.d("updateView", "Start ");
+        Logfn.d("Start");
 
         final ArrayList<SpotifyArtistSearchResult> searchResult = new ArrayList<>();
 
-        Log.d("SpotifyArtistSearch.do", "Artist = " + artist);
+        Logfn.d("Artist = " + artist);
 
         spotify.searchArtists(artist, new Callback<ArtistsPager>() {
             @Override
@@ -35,15 +33,15 @@ class SpotifyArtistSearch {
                     fragment.showToast(fragment.getString(R.string.no_artist_found));
 
                     if (pager == null)
-                        Log.e("artistUpdateListView", "pager is null");
+                        Logfn.e("pager is null");
                     else if (pager.artists == null)
-                        Log.e("artistUpdateListView", "pager.artists is null");
+                        Logfn.e("pager.artists is null");
                     else
-                        Log.e("artistUpdateListView", "pager.artists.items is null");
+                        Logfn.e("pager.artists.items is null");
                     return;
                 }
 
-                for (int i = 0; i < pager.artists.items.size(); i++) {
+                for (int i = 0; i < pager.artists.items.size(); ++i) {
                     Artist artist = pager.artists.items.get(i);
 
                     String artistName = artist.name;
@@ -60,7 +58,7 @@ class SpotifyArtistSearch {
                         }
                     }
                     else {
-                        Log.e("artistUpdateListView", "artists.images is null");
+                        Logfn.e("artists.images is null");
                     }
 
                     SpotifyArtistSearchResult newArtist = new SpotifyArtistSearchResult(artistName, artistId, imageUrlMedium);
@@ -77,7 +75,7 @@ class SpotifyArtistSearch {
 
             @Override
             public void failure(RetrofitError error) {
-                Log.e("SpotifyArtistSearch.do", "Error: " + error.toString());
+                Logfn.e("Error: " + error.toString());
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

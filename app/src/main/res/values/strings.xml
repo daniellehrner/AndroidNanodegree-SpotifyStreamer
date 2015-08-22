@@ -14,6 +14,7 @@
     <string name="button_pause">Pause button</string>
     <string name="button_previous">Previous button</string>
     <string name="button_next">Next button</string>
+    <string name="share_text">Share track</string>
 
     <string name="TAG_PLAY" translatable="false" >TAG_PLAY</string>
     <string name="TAG_PAUSE" translatable="false" >TAG_PAUSE</string>

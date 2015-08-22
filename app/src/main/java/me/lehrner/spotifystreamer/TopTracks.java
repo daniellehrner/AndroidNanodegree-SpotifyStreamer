@@ -3,7 +3,6 @@ package me.lehrner.spotifystreamer;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
@@ -20,7 +19,7 @@ public class TopTracks extends AppCompatActivity implements AdapterView.OnItemCl
         int trackId = mFragment.getTracks().indexOf(clickedItem);
 
         if (trackId == -1) {
-            Log.e("TopTracks.click", "clicked item not found: " + clickedItem.toString());
+            Logfn.e("clicked item not found: " + clickedItem.toString());
             finish();
         }
 
@@ -35,7 +34,7 @@ public class TopTracks extends AppCompatActivity implements AdapterView.OnItemCl
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("TopTracks.onCreate", "start");
+        Logfn.d("start");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_top_tracks);
 
@@ -50,7 +49,7 @@ public class TopTracks extends AppCompatActivity implements AdapterView.OnItemCl
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.d("TopTracks.saveInstance", "Start");
+        Logfn.d("Start");
         super.onSaveInstanceState(outState);
 
         //Save the fragment's instance

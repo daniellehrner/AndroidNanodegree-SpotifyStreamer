@@ -12,11 +12,8 @@ import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
-
-import com.squareup.leakcanary.RefWatcher;
 
 import java.util.ArrayList;
 
@@ -90,7 +87,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
 
     private void pause() {
         if (mPLayerState == PlayerState.STARTED) {
-            Log.d("Player.pause", "Pause");
+            Logfn.d("Pause");
             mMediaPlayer.pause();
             mPLayerState = PlayerState.PAUSE;
         }
@@ -101,7 +98,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
             mTrackId = mListSize - 1;
         }
         else {
-            mTrackId--;
+            --mTrackId;
         }
 
         play(mTrackId);
@@ -112,7 +109,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
             mTrackId = 0;
         }
         else {
-            mTrackId++;
+            ++mTrackId;
         }
 
         play(mTrackId);
@@ -122,7 +119,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
         if (mPLayerState == PlayerState.PAUSE) {
             mMediaPlayer.start();
             mPLayerState = PlayerState.STARTED;
-            Log.d("Player.onStartCommand", "Started");
+            Logfn.d("Started");
         }
         else {
             play(mTrackId);
@@ -139,7 +136,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
         }
 
         mPLayerState = PlayerState.IDLE;
-        Log.d("Player.play", "Idle");
+        Logfn.d("Idle");
         setDataSource(mPlayList.get(playListId).getTrackUrl());
         mTrackId = playListId;
     }
@@ -158,21 +155,21 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
 
     private void setDataSource(String url) {
         if (mPLayerState != PlayerState.IDLE) {
-            Log.d("Service.setDataSource", "Illegal state: " + mPLayerState);
+            Logfn.d("Illegal state: " + mPLayerState);
             stopSelf();
         }
 
-        Log.d("Player.setDataSource", "URL: " + url);
+        Logfn.d("URL: " + url);
 
         try {
             mMediaPlayer.setDataSource(url);
         }
         catch (Exception e) {
-            Log.e("Player.setDataSource", "Can't set data source: " + e.toString());
+            Logfn.e("Can't set data source: " + e.toString());
             stopSelf();
         }
 
-        Log.d("Player.setDataSource", "prepareAsync");
+        Logfn.d("prepareAsync");
         mMediaPlayer.prepareAsync();
     }
 
@@ -221,14 +218,14 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                 setNotificationIntent();
                 break;
             case ACTION_START:
-                Log.d("Service.onStartCommand", "Service started");
+                Logfn.d("Service started");
                 mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                 createNotificationRemoteViews();
                 createNotificationBuilder();
                 mBinder = new MediaPlayerBinder(this);
                 break;
             case ACTION_PREVIOUS:
-                Log.d("Service.onStartCommand", "Previous");
+                Logfn.d("Previous");
                 updateNotificationPlayPause(ACTION_PLAY);
                 updateNotificationTrack = true;
                 mNotificationBuilder.setOngoing(true);
@@ -236,7 +233,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                 setNotificationIntent();
                 break;
             case ACTION_NEXT:
-                Log.d("Service.onStartCommand", "Next");
+                Logfn.d("Next");
                 updateNotificationPlayPause(ACTION_PLAY);
                 updateNotificationTrack = true;
                 mNotificationBuilder.setOngoing(true);
@@ -245,22 +242,22 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                 break;
             case ACTION_PAUSE:
                 if (mMediaPlayer.isPlaying()) {
-                    Log.d("Service.onStartCommand", "Pause");
+                    Logfn.d("Pause");
                     updateNotificationPlayPause(ACTION_PAUSE);
                     mNotificationBuilder.setOngoing(false);
                     pause();
                 }
                 break;
             case ACTION_SET_IMAGE:
-                Log.d("Service.onStartCommand", "Set image");
+                Logfn.d("Set image");
                 setNotificationImage((Bitmap) intent.getParcelableExtra(KEY_NOTIFICATION_IMAGE));
                 break;
             case ACTION_SET_PROGRESS:
-                Log.d("Service.onStartCommand", "Set progress");
+                Logfn.d("Set progress");
                 setProgressAndPlay(intent.getIntExtra(KEY_PROGRESS, 0));
                 break;
             default:
-                Log.e("Service.onStartCommand", "Invalid action: " + intent.getAction());
+                Logfn.e("Invalid action: " + intent.getAction());
         }
 
         if (updateNotificationTrack) {
@@ -291,7 +288,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                 play();
                 break;
             default:
-                Log.d("setProgressAndPlay", "Nothing to do in state idle");
+                Logfn.d("Nothing to do in state idle");
         }
     }
 
@@ -309,29 +306,42 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
     private void setNotificationIntent() {
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(getApplicationContext());
 
-        // intent for main activity
-        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
-        notificationIntent.setAction(Intent.ACTION_SEARCH);
-        notificationIntent.putExtra(SearchManager.QUERY, mQuery);
-        stackBuilder.addNextIntent(notificationIntent);
+        if (getResources().getBoolean(R.bool.two_pane)) {
+            // intent for main activity
+            Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
+            notificationIntent.setAction(ACTION_NOTIFICATION);
+            notificationIntent.putExtra(SearchManager.QUERY, mQuery);
+            notificationIntent.putExtra(MainActivityFragment.ARTIST_ID, mArtistId);
+            notificationIntent.putExtra(MainActivityFragment.ARTIST_NAME, mArtist);
+            notificationIntent.putExtra(TopTracksFragment.ARRAY_ID, mTrackId);
+            notificationIntent.putExtra(TopTracksFragment.TRACK_ARRAY, mPlayList);
+            notificationIntent.putExtra(TopTracksFragment.ARTIST_NAME, mArtist);
+            stackBuilder.addNextIntent(notificationIntent);
+        }
+        else {
+            // intent for main activity
+            Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
+            notificationIntent.setAction(Intent.ACTION_SEARCH);
+            notificationIntent.putExtra(SearchManager.QUERY, mQuery);
+            stackBuilder.addNextIntent(notificationIntent);
 
-        // intent for top tracks
-        notificationIntent = new Intent(getApplicationContext(), TopTracks.class);
-        notificationIntent.putExtra(MainActivityFragment.ARTIST_ID, mArtistId);
-        notificationIntent.putExtra(MainActivityFragment.ARTIST_NAME, mArtist);
-        stackBuilder.addNextIntent(notificationIntent);
+            // intent for top tracks
+            notificationIntent = new Intent(getApplicationContext(), TopTracks.class);
+            notificationIntent.putExtra(MainActivityFragment.ARTIST_ID, mArtistId);
+            notificationIntent.putExtra(MainActivityFragment.ARTIST_NAME, mArtist);
+            stackBuilder.addNextIntent(notificationIntent);
 
-        // intent for player
-        notificationIntent = new Intent(getApplicationContext(), PlayerActivity.class);
-        notificationIntent.setAction(ACTION_NOTIFICATION);
-        notificationIntent.putExtra(TopTracksFragment.ARRAY_ID, mTrackId);
-        notificationIntent.putExtra(TopTracksFragment.TRACK_ARRAY, mPlayList);
-        notificationIntent.putExtra(TopTracksFragment.ARTIST_NAME, mArtist);
-        stackBuilder.addNextIntent(notificationIntent);
+            // intent for player
+            notificationIntent = new Intent(getApplicationContext(), PlayerActivity.class);
+            notificationIntent.setAction(ACTION_NOTIFICATION);
+            notificationIntent.putExtra(TopTracksFragment.ARRAY_ID, mTrackId);
+            notificationIntent.putExtra(TopTracksFragment.TRACK_ARRAY, mPlayList);
+            notificationIntent.putExtra(TopTracksFragment.ARTIST_NAME, mArtist);
+            stackBuilder.addNextIntent(notificationIntent);
+        }
 
         PendingIntent pendingNotificationIntent = stackBuilder.getPendingIntent(
-                0,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                0, PendingIntent.FLAG_UPDATE_CURRENT);
 
         mRemoteViews.setOnClickPendingIntent(R.id.notification_trackname, pendingNotificationIntent);
         mRemoteViews.setOnClickPendingIntent(R.id.notification_artist, pendingNotificationIntent);
@@ -374,7 +384,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                 mRemoteViews.setViewVisibility(R.id.notification_play, View.VISIBLE);
                 break;
             default:
-                Log.e("NotificationPlayPause", "Invalid action: " + action);
+                Logfn.e("Invalid action: " + action);
                 return;
         }
 
@@ -407,12 +417,12 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
         mPLayerState = PlayerState.STARTED;
         updateNotificationPlayPause(ACTION_PLAY);
         mDuration = mediaPlayer.getDuration();
-        Log.d("Player.onPrepared", "Started, duration: " + mDuration);
+        Logfn.d("Started, duration: " + mDuration);
     }
 
     @Override
     public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
-        Log.e("Service.onError", "What: " + what + ", extra: " + extra);
+        Logfn.e("What: " + what + ", extra: " + extra);
         mediaPlayer.release();
         //noinspection UnusedAssignment
         mediaPlayer = null;
@@ -459,7 +469,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
     }
 
     public void onCompletion(MediaPlayer mediaPlayer) {
-        Log.d("Service.onCompletion", "song completed");
+        Logfn.d("song completed");
 
         mPLayerState = PlayerState.COMPLETED;
 
@@ -477,21 +487,18 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
 
     @Override
     public void onDestroy() {
-        Log.d("Service.onDestroy", "end service");
+        Logfn.d("end service");
         super.onDestroy();
 
         if(mNotForeground) {
-            Log.d("Service.onDestroy", "cancel notification");
+            Logfn.d("cancel notification");
             mNotificationManager.cancel(mNotificationId);
         }
         else {
-            Log.d("Service.onDestroy", "stop foreground");
+            Logfn.d("stop foreground");
             stopForeground(true);
         }
 
         mBinder.clear();
-
-        RefWatcher refWatcher = SpotifyStreamerApplication.getRefWatcher(getApplication());
-        refWatcher.watch(this);
     }
 }

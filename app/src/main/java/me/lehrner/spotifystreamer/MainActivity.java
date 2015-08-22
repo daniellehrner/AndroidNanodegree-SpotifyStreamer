@@ -7,8 +7,9 @@ import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.support.v7.widget.ShareActionProvider;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
     private String mQuery;
     private int mTrackId;
     private boolean mIsNotificationIntent = false;
+    private ShareActionProvider mShareActionProvider;
 
     public boolean isTwoPane() {
         return mTwoPane;
@@ -64,6 +66,16 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
         return mQuery;
     }
 
+    public void setShareIntentUrl(String url) {
+        if (mShareActionProvider != null) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, url);
+
+            mShareActionProvider.setShareIntent(intent);
+        }
+    }
+
     public void onItemClick(AdapterView<?> adapter, View v, int position, long rowId) {
         SpotifyTrackSearchResult clickedItem = (SpotifyTrackSearchResult) adapter.getItemAtPosition(position);
 
@@ -73,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
         PlayerActivityFragment newFragment = new PlayerActivityFragment();
 
         if (getTrackId() == -1) {
-            Log.e("TopTracks.click", "clicked item not found: " + clickedItem.toString());
+            Logfn.e("clicked item not found: " + clickedItem.toString());
             finish();
         }
 
@@ -83,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        Log.d("Main.onNewIntent", "Start");
+        Logfn.d("Start");
 
         setIntent(intent);
         handleIntent(getIntent());
@@ -91,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("Main.onCreate", "Start");
+        Logfn.d("Start");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
@@ -106,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
         mTwoPane = getResources().getBoolean(R.bool.two_pane);
 
         if (mTwoPane) {
-            Log.d("Main.onCreate", "Two-pane mode");
+            Logfn.d("Two-pane mode");
 
             if (savedInstanceState == null) {
                 getSupportFragmentManager().beginTransaction()
@@ -116,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
             }
         }
         else {
-            Log.d("Main.onCreate", "Single-pane mode");
+            Logfn.d("Single-pane mode");
         }
 
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
@@ -134,16 +146,23 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
                 getSupportActionBar().setSubtitle(" ");
             }
             catch (NullPointerException e) {
-                Log.e("MainActivity.onStart", "Can't set subtitle");
+                Logfn.e("Can't set subtitle");
             }
         }
     }
 
 
     private void handleIntent(Intent intent) {
-        Log.d("handleIntent", "Action: " + intent.getAction());
+        String action = intent.getAction();
+        Logfn.d("Action: " + intent.getAction());
 
-        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+        mIsNotificationIntent = false;
+
+        if (MediaPlayerService.ACTION_NOTIFICATION.equals(action)) {
+            Logfn.d("Intent from Notification");
+            mIsNotificationIntent = true;
+        }
+        else if (Intent.ACTION_SEARCH.equals(action)) {
             mQuery = intent.getStringExtra(SearchManager.QUERY);
             mMainFragment.updateArtistView(mQuery);
         }
@@ -153,7 +172,14 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_search, menu);
-        return true;
+
+        if (isTwoPane()) {
+            getMenuInflater().inflate(R.menu.menu_player, menu);
+            MenuItem item = menu.findItem(R.id.menu_track_share);
+            mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+        }
+
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -172,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
     }
 
     private void clearSearchSuggestions() {
-        Log.d("clearSearchSuggestions", "clear search history");
+        Logfn.d("clear search history");
         SearchRecentSuggestions suggestions = new SearchRecentSuggestions(this,
                 ArtistSuggestionProvider.AUTHORITY, ArtistSuggestionProvider.MODE);
         suggestions.clearHistory();

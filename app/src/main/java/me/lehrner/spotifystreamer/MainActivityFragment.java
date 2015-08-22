@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.provider.SearchRecentSuggestions;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +16,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.Toast;
-
-import com.squareup.leakcanary.RefWatcher;
 
 import java.util.ArrayList;
 
@@ -55,7 +52,7 @@ public class MainActivityFragment extends Fragment {
     @SuppressLint("ShowToast")
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        Log.d("Main.onActivityCreated", "Start");
+        Logfn.d("Start");
         super.onActivityCreated(savedInstanceState);
 
         mContext = getActivity();
@@ -148,14 +145,14 @@ public class MainActivityFragment extends Fragment {
         // save last artist only when search was successful
         mLastArtist = mCurrentArtist;
 
-        Log.d("saveLastSearchQuery", "saving: " + mLastArtist);
+        Logfn.d("saving: " + mLastArtist);
         SearchRecentSuggestions suggestions = new SearchRecentSuggestions(mContext,
                 ArtistSuggestionProvider.AUTHORITY, ArtistSuggestionProvider.MODE);
         suggestions.saveRecentQuery(mLastArtist.trim().toLowerCase(), null);
     }
 
     public void updateArtistView(String artist) {
-        Log.d("updateArtistView", "Start");
+        Logfn.d("Start");
         if (mLastArtist != null && mLastArtist.equals(artist)) {
             showToast(getString(R.string.same_artist));
             return;
@@ -246,12 +243,5 @@ public class MainActivityFragment extends Fragment {
         }
 
         outState.putInt(KEY_LIST_POSITION, mListView.getCheckedItemPosition());
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        RefWatcher refWatcher = SpotifyStreamerApplication.getRefWatcher(mActivity);
-        refWatcher.watch(this);
     }
 }

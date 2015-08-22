@@ -5,9 +5,12 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.support.v7.widget.ShareActionProvider;
 
 import com.bumptech.glide.Glide;
 
@@ -22,25 +25,26 @@ public class PlayerActivity extends AppCompatActivity implements PlayerActivityF
     private static final String KEY_ARRAY_ID = "me.lehrner.spotifystreamer.tag";
     private static final String KEY_ARTIST_ID = "me.lehrner.spotifystreamer.id";
 
-    private String mArtistName, mArtistId, mQuery;
+    private String mArtistName, mArtistId, mQuery, mTrackUrl;
     private int mArrayId;
     private ArrayList<SpotifyTrackSearchResult> mTracks;
     private PlayerActivityFragment mFragment;
     private boolean mIsNotificationIntent = false;
+    private ShareActionProvider mShareActionProvider;
 
     @SuppressWarnings("unused")
     public void buttonPrevNext(View view) {
         switch (view.getId()) {
             case R.id.player_image_next:
-                Log.d("buttonPrevNext", "Button next");
+                Logfn.d("Button next");
                 mFragment.next();
                 break;
             case R.id.player_image_previous:
-                Log.d("buttonPrevNext", "Button previous");
+                Logfn.d("Button previous");
                 mFragment.previous();
                 break;
             default:
-                Log.e("buttonPrevNext", "Invalid id: " + view.getId());
+                Logfn.e("Invalid id: " + view.getId());
         }
     }
 
@@ -107,10 +111,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerActivityF
     }
 
     private void handleIntent(Intent intent) {
-        Log.d("Player.handleIntent", "Action: " + intent.getAction());
+        Logfn.d("Action: " + intent.getAction());
 
         if (intent.getAction() != null && intent.getAction().equals(MediaPlayerService.ACTION_NOTIFICATION)) {
-            Log.d("Player.handleIntent", "Intent from Notification");
+            Logfn.d("Intent from Notification");
             mIsNotificationIntent = true;
         }
         else {
@@ -126,7 +130,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerActivityF
 
         try {
             if (mTracks != null) {
-                Log.d("Player.handleIntent", "Size tracks array: " + mTracks.size());
+                Logfn.d("Size tracks array: " + mTracks.size());
             } else {
                 throw new Exception("mTracks is null");
             }
@@ -136,9 +140,39 @@ public class PlayerActivity extends AppCompatActivity implements PlayerActivityF
             }
         }
         catch (Exception e) {
-            Log.e("Player.handleIntent", e.getMessage());
+            Logfn.e(e.getMessage());
             finish();
         }
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu (Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+
+        if (mShareActionProvider != null && mTrackUrl != null) {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("text/plain");
+            intent.putExtra(Intent.EXTRA_TEXT, mTrackUrl);
+
+            mShareActionProvider.setShareIntent(intent);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_player, menu);
+        MenuItem item = menu.findItem(R.id.menu_track_share);
+        mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(item);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    public void setShareIntentUrl(String url) {
+        mTrackUrl = url;
     }
 
     @Override
@@ -154,7 +188,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerActivityF
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        Log.d("TopTracks.saveInstance", "Start");
+        Logfn.d("Start");
         super.onSaveInstanceState(outState);
 
         //Save the fragment's instance
