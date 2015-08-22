@@ -53,7 +53,6 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
     private Timer mTimer;
     private TimerTask mUpdateTrackStatus;
     private OnTrackSelectedListener mTrackListener;
-    private MediaPlayerBinder mBinder;
 
     public PlayerActivityFragment() {
     }
@@ -328,7 +327,7 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
-            mBinder = (MediaPlayerBinder) service;
+            MediaPlayerBinder mBinder = (MediaPlayerBinder) service;
             mPlayerService = mBinder.getService();
             mBound = true;
 

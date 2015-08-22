@@ -3,7 +3,6 @@ package me.lehrner.spotifystreamer;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -131,9 +130,9 @@ public class MainActivityFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        mActivity = (MainActivity) activity;
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mActivity = (MainActivity) context;
     }
 
     private void addAllAdapter(ArrayList<SpotifyArtistSearchResult> searchResult) {
