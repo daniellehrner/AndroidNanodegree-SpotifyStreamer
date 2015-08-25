@@ -24,20 +24,24 @@ public class MainActivityFragment extends Fragment {
     public final static String ARTIST_NAME = "me.lehrner.spotifystreamer.ARTIST_NAME";
     public final static String ARTIST_ID = "me.lehrner.spotifystreamer.ARTIST_ID";
     private final static String KEY_LAST_ARTIST = "me.lehrner.spotifystreamer.lastArtist";
-    private final static String KEY_LIST_POSITION = "me.lehrner.spotifystreamer.position";
+    public final static String KEY_LIST_POSITION = "me.lehrner.spotifystreamer.position";
 
     private ArtistAdapter mAdapter;
     private ArrayList<SpotifyArtistSearchResult> mArtists;
     private ListView mListView;
     private SearchView mSearchView;
     private View mLoadingView, mRootView;
-    private int mShortAnimationDuration;
+    private int mShortAnimationDuration, mPosition;
     private Toast toast;
     private Context mContext;
     private MainActivity mActivity;
     private String mLastArtist, mCurrentArtist;
 
     public MainActivityFragment() {
+    }
+
+    public int getPosition() {
+        return mPosition;
     }
 
     @Override
@@ -79,6 +83,8 @@ public class MainActivityFragment extends Fragment {
                     mActivity.getTopTracksFragment().updateTopTracks(clickedItem.getArtistId(),
                             clickedItem.getArtistName(),
                             mActivity);
+
+                    mPosition = position;
                 }
                 else {
                     Intent topTracksIntent = new Intent(mContext, TopTracks.class);
@@ -100,7 +106,8 @@ public class MainActivityFragment extends Fragment {
 
             // not needed on phones
             if (mActivity.isTwoPane()) {
-                mListView.smoothScrollToPosition(savedInstanceState.getInt(KEY_LIST_POSITION));
+                mPosition = savedInstanceState.getInt(KEY_LIST_POSITION);
+                mListView.smoothScrollToPosition(mPosition);
             }
         }
         else {
@@ -127,6 +134,12 @@ public class MainActivityFragment extends Fragment {
             }
         }
         fadeListViewIn();
+
+        if (mActivity.isTwoPane() && mActivity.isNotificationIntent()) {
+            Logfn.d("set artist selection to " + mPosition);
+            mListView.setItemChecked(mPosition, true);
+            mActivity.getTopTracksFragment().updateTopTracks(mActivity.getArtistId(), mActivity.getArtistName(), mActivity);
+        }
     }
 
     @Override
@@ -241,6 +254,12 @@ public class MainActivityFragment extends Fragment {
             outState.putString(KEY_LAST_ARTIST, " ");
         }
 
-        outState.putInt(KEY_LIST_POSITION, mListView.getCheckedItemPosition());
+        if (mActivity.isTwoPane()) {
+            outState.putInt(KEY_LIST_POSITION, mPosition);
+        }
+    }
+
+    public void setArtistPosition(int artistPosition) {
+        mPosition = artistPosition;
     }
 }

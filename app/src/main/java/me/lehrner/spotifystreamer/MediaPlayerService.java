@@ -43,7 +43,8 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
 
     private MediaPlayer mMediaPlayer = null;
     private MediaPlayerBinder mBinder;
-    private int mStartId = 0, mTrackId = 0, mListSize = 0, mDuration = 0, mUserProgress = 0;
+    private int mStartId = 0, mTrackId = 0, mListSize = 0, mDuration = 0,
+            mUserProgress = 0, mArtistPosition = -1;
     private ArrayList<SpotifyTrackSearchResult> mPlayList;
     private PlayerState mPLayerState = PlayerState.IDLE;
     private NotificationCompat.Builder mNotificationBuilder;
@@ -189,6 +190,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                 String artist = intent.getStringExtra(KEY_ARTIST);
                 String artistId = intent.getStringExtra(KEY_ARTIST_ID);
                 String query = intent.getStringExtra(MainActivity.KEY_QUERY);
+                int artistPosition = intent.getIntExtra(MainActivityFragment.KEY_LIST_POSITION, -1);
 
                 if (artist != null) {
                     mArtist = artist;
@@ -213,6 +215,10 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                 else {
                     play(trackId);
                     updateNotificationTrack = true;
+                }
+
+                if (artistPosition != -1) {
+                    mArtistPosition = artistPosition;
                 }
 
                 setNotificationIntent();
@@ -316,6 +322,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
             notificationIntent.putExtra(TopTracksFragment.ARRAY_ID, mTrackId);
             notificationIntent.putExtra(TopTracksFragment.TRACK_ARRAY, mPlayList);
             notificationIntent.putExtra(TopTracksFragment.ARTIST_NAME, mArtist);
+            notificationIntent.putExtra(MainActivityFragment.KEY_LIST_POSITION, mArtistPosition);
             stackBuilder.addNextIntent(notificationIntent);
         }
         else {

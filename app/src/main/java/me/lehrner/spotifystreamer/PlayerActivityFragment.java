@@ -59,9 +59,11 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
 
     public interface OnTrackSelectedListener {
         boolean getIsNotificationIntent();
+        boolean isTwoPane();
         String getArtistName();
         ArrayList<SpotifyTrackSearchResult> getTracks();
         int getTrackId();
+        int getArtistPosition();
         String getArtistId();
         String getQuery();
         void setShareIntentUrl(String url);
@@ -419,6 +421,10 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
         mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_ARTIST, mArtistName);
         mPlayerServiceIntent.putExtra(MediaPlayerService.KEY_ARTIST_ID, mTrackListener.getArtistId());
         mPlayerServiceIntent.putExtra(MainActivity.KEY_QUERY, mTrackListener.getQuery());
+
+        if (mTrackListener.isTwoPane()) {
+            mPlayerServiceIntent.putExtra(MainActivityFragment.KEY_LIST_POSITION, mTrackListener.getArtistPosition());
+        }
 
         mActivity.startService(mPlayerServiceIntent);
 

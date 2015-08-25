@@ -61,6 +61,15 @@ public class PlayerActivity extends AppCompatActivity implements PlayerActivityF
         return mIsNotificationIntent;
     }
 
+    public boolean isTwoPane() {
+        return false;
+    }
+
+    // never used
+    public int getArtistPosition() {
+        return 0;
+    }
+
     public ArrayList<SpotifyTrackSearchResult> getTracks() {
         return mTracks;
     }
