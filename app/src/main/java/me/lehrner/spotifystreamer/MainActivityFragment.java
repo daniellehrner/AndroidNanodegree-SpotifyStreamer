@@ -36,12 +36,17 @@ public class MainActivityFragment extends Fragment {
     private Context mContext;
     private MainActivity mActivity;
     private String mLastArtist, mCurrentArtist;
+    private boolean mIsNotificationIntent = false;
 
     public MainActivityFragment() {
     }
 
     public int getPosition() {
         return mPosition;
+    }
+
+    public void setNotificationIntent(boolean b) {
+        mIsNotificationIntent = b;
     }
 
     @Override
@@ -135,10 +140,13 @@ public class MainActivityFragment extends Fragment {
         }
         fadeListViewIn();
 
-        if (mActivity.isTwoPane() && mActivity.isNotificationIntent()) {
+        if (mActivity.isTwoPane() && mIsNotificationIntent) {
             Logfn.d("set artist selection to " + mPosition);
             mListView.setItemChecked(mPosition, true);
-            mActivity.getTopTracksFragment().updateTopTracks(mActivity.getArtistId(), mActivity.getArtistName(), mActivity);
+//            mActivity.getTopTracksFragment().updateTopTracks(mActivity.getArtistId(), mActivity.getArtistName(), mActivity);
+            mActivity.getTopTracksFragment().getSearchResult(mActivity.getTracks());
+
+            mIsNotificationIntent = false;
         }
     }
 

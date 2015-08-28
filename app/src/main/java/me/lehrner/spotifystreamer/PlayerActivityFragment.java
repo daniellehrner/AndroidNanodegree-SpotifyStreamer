@@ -53,22 +53,26 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
     private Timer mTimer;
     private TimerTask mUpdateTrackStatus;
     private OnTrackSelectedListener mTrackListener;
+    private OnMainActivityControlListener mMainActivityControlListener;
 
     public PlayerActivityFragment() {
     }
 
     public interface OnTrackSelectedListener {
-        boolean getIsNotificationIntent();
+        boolean isNotificationIntent();
         boolean isTwoPane();
         String getArtistName();
         ArrayList<SpotifyTrackSearchResult> getTracks();
         int getTrackId();
-        int getArtistPosition();
         String getArtistId();
         String getQuery();
         void setShareIntentUrl(String url);
     }
 
+    public interface OnMainActivityControlListener {
+        int getArtistPosition();
+        void setNotificationIntent(boolean b);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -128,7 +132,14 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
             mTrackId = mTrackListener.getTrackId();
 
             newTrack = true;
-            autoStart = !mTrackListener.getIsNotificationIntent();
+
+            if (mTrackListener.isNotificationIntent()) {
+                autoStart = false;
+                mMainActivityControlListener.setNotificationIntent(false);
+            }
+            else {
+                autoStart = true;
+            }
         }
 
         setTrack(mTrackId, newTrack);
@@ -151,6 +162,35 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
 
         startBindService();
         mSeekBar.setOnSeekBarChangeListener(this);
+        setButtonOnClick();
+    }
+
+    private void setButtonOnClick() {
+        mPlayButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                playPauseTrack((String) v.getTag());
+            }
+        });
+
+        final View.OnClickListener prevNextListener = new View.OnClickListener() {
+            public void onClick(View v) {
+                switch (v.getId()) {
+                    case R.id.player_image_next:
+                        Logfn.d("Button next");
+                        next();
+                        break;
+                    case R.id.player_image_previous:
+                        Logfn.d("Button previous");
+                        previous();
+                        break;
+                    default:
+                        Logfn.e("Invalid id: " + v.getId());
+                }
+            }
+        };
+
+        mRootView.findViewById(R.id.player_image_previous).setOnClickListener(prevNextListener);
+        mRootView.findViewById(R.id.player_image_next).setOnClickListener(prevNextListener);
     }
 
     private void startBindService() {
@@ -348,7 +388,6 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
             Logfn.d("Unbound");
             mBound = false;
             mPlayerService = null;
-//            mBinder.clear();
             stopTimer();
         }
     };
@@ -397,7 +436,7 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
         }
     }
 
-    public void playPauseTrack(String buttonTag) {
+    private void playPauseTrack(String buttonTag) {
         if (buttonTag.equals(getString(R.string.TAG_PLAY))) {
             Logfn.d("Button play");
             sendMediaPlayerIntent(MediaPlayerService.ACTION_PLAY);
@@ -423,7 +462,7 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
         mPlayerServiceIntent.putExtra(MainActivity.KEY_QUERY, mTrackListener.getQuery());
 
         if (mTrackListener.isTwoPane()) {
-            mPlayerServiceIntent.putExtra(MainActivityFragment.KEY_LIST_POSITION, mTrackListener.getArtistPosition());
+            mPlayerServiceIntent.putExtra(MainActivityFragment.KEY_LIST_POSITION, mMainActivityControlListener.getArtistPosition());
         }
 
         mActivity.startService(mPlayerServiceIntent);
@@ -432,13 +471,13 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
         mPlayerServiceIntent.removeExtra(MediaPlayerService.KEY_TRACK_ID);
     }
 
-    public void previous() {
+    private void previous() {
         if (mBound) {
             sendMediaPlayerIntent(MediaPlayerService.ACTION_PREVIOUS);
         }
     }
 
-    public void next() {
+    private void next() {
         if (mBound) {
             sendMediaPlayerIntent(MediaPlayerService.ACTION_NEXT);
         }
@@ -482,6 +521,14 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnTrackSelectedListener");
         }
+
+        if (mTrackListener.isTwoPane()) {
+            try {
+                mMainActivityControlListener = (OnMainActivityControlListener) activity;
+            } catch (ClassCastException e) {
+                throw new ClassCastException(activity.toString() + " must implement OnMainActivityControlListener");
+            }
+        }
     }
 
     @Override
@@ -491,7 +538,6 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
         if (mBound) {
             mActivity.unbindService(mConnection);
             Logfn.d("Unbound from Service");
-//            mBinder.clear();
         }
 
         stopTimer();

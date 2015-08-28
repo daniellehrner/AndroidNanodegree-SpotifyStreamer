@@ -11,7 +11,7 @@ public final class Logfn {
         String[] classNameParts = e.getClassName().split("\\.");
         String className = classNameParts[classNameParts.length-1];
 
-        return className + "." + methodName;
+        return className + "." + methodName + ":";
     }
 
     public static void d(String msg) {

@@ -9,7 +9,6 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.support.v7.widget.ShareActionProvider;
 
 import com.bumptech.glide.Glide;
@@ -32,42 +31,16 @@ public class PlayerActivity extends AppCompatActivity implements PlayerActivityF
     private boolean mIsNotificationIntent = false;
     private ShareActionProvider mShareActionProvider;
 
-    @SuppressWarnings("unused")
-    public void buttonPrevNext(View view) {
-        switch (view.getId()) {
-            case R.id.player_image_next:
-                Logfn.d("Button next");
-                mFragment.next();
-                break;
-            case R.id.player_image_previous:
-                Logfn.d("Button previous");
-                mFragment.previous();
-                break;
-            default:
-                Logfn.e("Invalid id: " + view.getId());
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public void buttonPlay(View view) {
-        mFragment.playPauseTrack((String) view.getTag());
-    }
-
     public String getArtistName() {
         return mArtistName;
     }
 
-    public boolean getIsNotificationIntent() {
+    public boolean isNotificationIntent() {
         return mIsNotificationIntent;
     }
 
     public boolean isTwoPane() {
         return false;
-    }
-
-    // never used
-    public int getArtistPosition() {
-        return 0;
     }
 
     public ArrayList<SpotifyTrackSearchResult> getTracks() {

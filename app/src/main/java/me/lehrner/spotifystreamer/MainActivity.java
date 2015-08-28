@@ -21,6 +21,7 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements  PlayerActivityFragment.OnTrackSelectedListener,
+                                                                PlayerActivityFragment.OnMainActivityControlListener,
                                                                 AdapterView.OnItemClickListener  {
     private static final String MAIN_FRAGMENT_NAME = "MainActivityFragment";
     private static final String TOP_TRACKS_FRAGMENT_NAME = "TopTracksFragment";
@@ -29,7 +30,7 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
     private MainActivityFragment mMainFragment;
     private TopTracksFragment mTopTracksFragment;
     private String mQuery, mArtistId, mArtistName;
-    private int mTrackId, mArrayId;
+    private int mTrackId;
     private boolean mIsNotificationIntent = false, mTwoPane;
     private ShareActionProvider mShareActionProvider;
     private ArrayList<SpotifyTrackSearchResult> mTracks;
@@ -42,12 +43,12 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
         return mIsNotificationIntent;
     }
 
-    public TopTracksFragment getTopTracksFragment() {
-        return mTopTracksFragment;
+    public void setNotificationIntent(boolean b) {
+        mIsNotificationIntent = b;
     }
 
-    public boolean getIsNotificationIntent() {
-        return mIsNotificationIntent;
+    public TopTracksFragment getTopTracksFragment() {
+        return mTopTracksFragment;
     }
 
     public String getArtistName() {
@@ -64,10 +65,6 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
 
     public String getArtistId() {
         return mIsNotificationIntent ? mArtistId : mTopTracksFragment.getArtistId();
-    }
-
-    public int getArrayId() {
-        return mArrayId;
     }
 
     public int getArtistPosition() {
@@ -91,16 +88,17 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
     public void onItemClick(AdapterView<?> adapter, View v, int position, long rowId) {
         SpotifyTrackSearchResult clickedItem = (SpotifyTrackSearchResult) adapter.getItemAtPosition(position);
 
-        mTrackId = getTracks().indexOf(clickedItem);
+        ArrayList<SpotifyTrackSearchResult> tracks = getTracks();
+        mTrackId = tracks.indexOf(clickedItem);
+//        mTrackId = getTracks().indexOf(clickedItem);
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        PlayerActivityFragment newFragment = new PlayerActivityFragment();
-
-        if (getTrackId() == -1) {
+        if (mTrackId == -1) {
             Logfn.e("clicked item not found: " + clickedItem.toString());
             finish();
         }
 
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        PlayerActivityFragment newFragment = new PlayerActivityFragment();
         newFragment.show(fragmentManager, "dialog");
     }
 
@@ -129,7 +127,6 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
             if (mIsNotificationIntent) {
                 mArtistName = savedInstanceState.getString(TopTracksFragment.ARTIST_NAME);
                 mArtistId = savedInstanceState.getString(TopTracksFragment.ARTIST_ID);
-                mArrayId = savedInstanceState.getInt(TopTracksFragment.ARRAY_ID);
                 mTracks = savedInstanceState.getParcelableArrayList(TopTracksFragment.TRACK_ARRAY);
             }
         }
@@ -170,32 +167,34 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
         }
     }
 
-
     private void handleIntent(Intent intent) {
         String action = intent.getAction();
         Logfn.d("Action: " + intent.getAction());
 
-        mIsNotificationIntent = false;
-
         if (action.equals(MediaPlayerService.ACTION_NOTIFICATION)) {
             Logfn.d("Intent from Notification");
             mIsNotificationIntent = true;
+            mMainFragment.setNotificationIntent(true);
 
             mQuery = intent.getStringExtra(SearchManager.QUERY);
 
             if (mTwoPane) {
                 mMainFragment.updateArtistView(mQuery);
 
-                mArrayId = intent.getIntExtra(TopTracksFragment.ARRAY_ID, -1);
                 mTracks =  intent.getParcelableArrayListExtra(TopTracksFragment.TRACK_ARRAY);
                 mArtistName = intent.getStringExtra(TopTracksFragment.ARTIST_NAME);
                 mArtistId = intent.getStringExtra(TopTracksFragment.ARTIST_ID);
                 mMainFragment.setArtistPosition(intent.getIntExtra(MainActivityFragment.KEY_LIST_POSITION, -1));
+
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                PlayerActivityFragment newFragment = new PlayerActivityFragment();
+                newFragment.show(fragmentManager, "dialog");
             }
         }
         else if (action.equals(Intent.ACTION_SEARCH)) {
             mQuery = intent.getStringExtra(SearchManager.QUERY);
             mMainFragment.updateArtistView(mQuery);
+            mIsNotificationIntent = false;
         }
     }
 
@@ -246,7 +245,6 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
         if (mIsNotificationIntent) {
             outState.putString(TopTracksFragment.ARTIST_NAME, mArtistName);
             outState.putString(TopTracksFragment.ARTIST_ID, mArtistId);
-            outState.putInt(TopTracksFragment.ARRAY_ID, mArrayId);
             outState.putParcelableArrayList(TopTracksFragment.TRACK_ARRAY, mTracks);
         }
     }

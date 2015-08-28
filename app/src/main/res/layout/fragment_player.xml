@@ -53,7 +53,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:onClick="buttonPrevNext"
         style="?android:attr/borderlessButtonStyle"/>
 
     <ImageButton
@@ -65,7 +64,6 @@
         android:contentDescription="@string/button_play"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:onClick="buttonPlay"
         style="?android:attr/borderlessButtonStyle"/>
 
     <ImageButton
@@ -77,7 +75,6 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
-        android:onClick="buttonPrevNext"
         style="?android:attr/borderlessButtonStyle"/>
 
     <TextView
