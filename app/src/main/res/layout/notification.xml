@@ -28,15 +28,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="marquee"
-            android:singleLine="true"
-            android:textColor="@android:color/black" />
+            android:singleLine="true"/>
         <TextView
             android:id="@+id/notification_artist"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="marquee"
-            android:singleLine="true"
-            android:textColor="@android:color/black" />
+            android:singleLine="true" />
     </LinearLayout>
 
     <ImageButton
@@ -46,7 +44,6 @@
         android:layout_height="40dp"
         android:layout_margin="5dp"
         android:scaleType="fitXY"
-        android:src="@drawable/ic_skip_previous_black_48dp"
         android:contentDescription="@string/button_previous"/>
 
     <ImageButton
@@ -56,7 +53,6 @@
         android:layout_height="40dp"
         android:layout_margin="5dp"
         android:scaleType="fitXY"
-        android:src="@drawable/ic_play_arrow_black_48dp"
         android:visibility="gone"
         android:contentDescription="@string/button_play"/>
 
@@ -67,7 +63,6 @@
         android:layout_height="40dp"
         android:layout_margin="5dp"
         android:scaleType="fitXY"
-        android:src="@drawable/ic_pause_black_48dp"
         android:contentDescription="@string/button_pause"/>
 
     <ImageButton
@@ -77,6 +72,5 @@
         android:layout_height="40dp"
         android:layout_margin="5dp"
         android:scaleType="fitXY"
-        android:src="@drawable/ic_skip_next_black_48dp"
         android:contentDescription="@string/button_next"/>
 </LinearLayout>

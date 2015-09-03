@@ -7,8 +7,10 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
@@ -46,11 +48,11 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
     private int mStartId = 0, mTrackId = 0, mListSize = 0, mDuration = 0,
             mUserProgress = 0, mArtistPosition = -1;
     private ArrayList<SpotifyTrackSearchResult> mPlayList;
-    private PlayerState mPLayerState = PlayerState.IDLE;
+    private int mPLayerState = PlayerState.IDLE;
     private NotificationCompat.Builder mNotificationBuilder;
     private RemoteViews mRemoteViews;
     private String mArtist, mArtistId, mQuery;
-    private boolean mNotForeground = true;
+    private boolean mNotForeground = true, mInitialized = true;
     private NotificationManager mNotificationManager;
 
     @Override
@@ -84,6 +86,10 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
 
     public boolean isPlaying() {
         return (mMediaPlayer != null) && mMediaPlayer.isPlaying();
+    }
+
+    public int getPlayListSize() {
+        return (mPlayList != null) ? mPlayList.size() : -1;
     }
 
     private void pause() {
@@ -282,14 +288,14 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
         }
 
         switch(mPLayerState) {
-            case STARTED:
+            case PlayerState.STARTED:
                 mMediaPlayer.seekTo(progress);
                 break;
-            case PAUSE:
+            case PlayerState.PAUSE:
                 mMediaPlayer.seekTo(progress);
                 play();
                 break;
-            case COMPLETED:
+            case PlayerState.COMPLETED:
                 mUserProgress = progress;
                 play();
                 break;
@@ -420,11 +426,17 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
             mUserProgress = 0;
         }
 
-        mediaPlayer.start();
-        mPLayerState = PlayerState.STARTED;
-        updateNotificationPlayPause(ACTION_PLAY);
         mDuration = mediaPlayer.getDuration();
-        Logfn.d("Started, duration: " + mDuration);
+
+        if (mInitialized) {
+            mediaPlayer.start();
+            mPLayerState = PlayerState.STARTED;
+            updateNotificationPlayPause(ACTION_PLAY);
+            Logfn.d("Started, duration: " + mDuration);
+        }
+        else {
+            mediaPlayer.seekTo(mDuration);
+        }
     }
 
     @Override
@@ -456,6 +468,25 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
     private void createNotificationRemoteViews() {
         mRemoteViews = new RemoteViews(getPackageName(), R.layout.notification);
 
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mRemoteViews.setTextColor(R.id.notification_trackname, Color.BLACK);
+            mRemoteViews.setTextColor(R.id.notification_artist, Color.BLACK);
+
+            mRemoteViews.setImageViewResource(R.id.notification_previous, R.drawable.ic_skip_previous_black_48dp);
+            mRemoteViews.setImageViewResource(R.id.notification_play, R.drawable.ic_play_arrow_black_48dp);
+            mRemoteViews.setImageViewResource(R.id.notification_pause, R.drawable.ic_pause_black_48dp);
+            mRemoteViews.setImageViewResource(R.id.notification_next, R.drawable.ic_skip_next_black_48dp);
+        }
+        else {
+            mRemoteViews.setTextColor(R.id.notification_trackname, Color.WHITE);
+            mRemoteViews.setTextColor(R.id.notification_artist, Color.WHITE);
+
+            mRemoteViews.setImageViewResource(R.id.notification_previous, android.R.drawable.ic_media_previous);
+            mRemoteViews.setImageViewResource(R.id.notification_play, android.R.drawable.ic_media_play);
+            mRemoteViews.setImageViewResource(R.id.notification_pause, android.R.drawable.ic_media_pause);
+            mRemoteViews.setImageViewResource(R.id.notification_next, android.R.drawable.ic_media_next);
+        }
+
         Intent intent = new Intent(this, MediaPlayerService.class);
         intent.setAction(ACTION_PREVIOUS);
         PendingIntent pendingIntent = PendingIntent.getService(this, 0,
@@ -471,12 +502,14 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
         mRemoteViews.setOnClickPendingIntent(R.id.notification_pause, pendingIntent);
 
         mRemoteViews.setOnClickPendingIntent(R.id.notification_play, getPlayPendingIntent());
-
-//        intent = new Intent(this, PlayerActivity.class)
     }
 
     public void onCompletion(MediaPlayer mediaPlayer) {
         Logfn.d("song completed");
+
+        updateNotificationPlayPause(ACTION_PAUSE);
+        mNotificationBuilder.setOngoing(false);
+        mRemoteViews.setOnClickPendingIntent(R.id.notification_play, getPlayPendingIntent(mTrackId));
 
         mPLayerState = PlayerState.COMPLETED;
 
@@ -484,10 +517,6 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
             mMediaPlayer.release();
             mMediaPlayer = null;
         }
-
-        mRemoteViews.setOnClickPendingIntent(R.id.notification_play, getPlayPendingIntent(mTrackId));
-        mNotificationBuilder.setOngoing(false);
-        updateNotificationPlayPause(ACTION_PAUSE);
 
         stopSelfResult(mStartId);
     }

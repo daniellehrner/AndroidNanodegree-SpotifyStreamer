@@ -61,6 +61,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerActivityF
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Logfn.d("Start");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
@@ -165,6 +166,7 @@ public class PlayerActivity extends AppCompatActivity implements PlayerActivityF
 
     @Override
     public void onAttachFragment (Fragment fragment) {
+        Logfn.d("Start");
         mFragment = (PlayerActivityFragment) fragment;
     }
 

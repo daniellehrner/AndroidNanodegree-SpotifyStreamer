@@ -45,7 +45,8 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
     private MediaPlayerService mPlayerService;
     private Intent mPlayerServiceIntent;
     private View mRootView;
-    private boolean mBound = false, mPlayAfterConnected = false, mSeekBarUserTouch = false;
+    private boolean mBound = false, mPlayAfterConnected = false,
+            mSeekBarUserTouch = false, mNewTrack = false, mAutoStart = false;
     private String mArtistName;
     private int mTrackDuration = 0, mCurrentPosition = 0, mLastCurrentPosition = 0,
             mLastTrackDuration = 0, mTrackId = 0, mProgressByUser = 0;
@@ -77,6 +78,7 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Logfn.d("Start");
         mRootView = inflater.inflate(R.layout.fragment_player, container, false);
         return mRootView;
     }
@@ -84,6 +86,7 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Logfn.d("Start");
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         return dialog;
@@ -98,7 +101,44 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
     }
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        Logfn.d("Start");
+        super.onCreate(savedInstanceState);
+
+        mPlayerServiceIntent = new Intent(mActivity, MediaPlayerService.class);
+
+        if (savedInstanceState != null) {
+            Logfn.d("savedInstanceState not null");
+            mTracks = savedInstanceState.getParcelableArrayList(KEY_TRACKS);
+            mArtistName = savedInstanceState.getString(KEY_ARTIST);
+            mTrackId = savedInstanceState.getInt(KEY_TRACK_ID);
+
+            mTrackDuration = savedInstanceState.getInt(KEY_DURATION);
+            mCurrentPosition = savedInstanceState.getInt(KEY_CURRENT_POSITION);
+        }
+        else {
+            Logfn.d("savedInstanceState null");
+            mTracks = mTrackListener.getTracks();
+            mArtistName = mTrackListener.getArtistName();
+            mTrackId = mTrackListener.getTrackId();
+
+            mNewTrack = true;
+
+            if (mTrackListener.isNotificationIntent()) {
+                mAutoStart = false;
+                if (mMainActivityControlListener != null) {
+                    mMainActivityControlListener.setNotificationIntent(false);
+                }
+            }
+            else {
+                mAutoStart = true;
+            }
+        }
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
+        Logfn.d("Start");
         super.onActivityCreated(savedInstanceState);
 
         mArtistNameView = (TextView) mRootView.findViewById(R.id.player_artist_name);
@@ -110,41 +150,15 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
         mPlayerTimeEndView = (TextView) mRootView.findViewById(R.id.player_time_end);
         mSeekBar = (SeekBar) mRootView.findViewById(R.id.player_time_progress);
 
-        mPlayerServiceIntent = new Intent(mActivity, MediaPlayerService.class);
-
-        boolean newTrack = false, autoStart = false;
-
         if (savedInstanceState != null) {
-            mTracks = savedInstanceState.getParcelableArrayList(KEY_TRACKS);
-            mArtistName = savedInstanceState.getString(KEY_ARTIST);
-            mTrackId = savedInstanceState.getInt(KEY_TRACK_ID);
-
-            mTrackDuration = savedInstanceState.getInt(KEY_DURATION);
-            mPlayerTimeEndView.setText(timeIntToString(mTrackDuration));
             mSeekBar.setMax(mTrackDuration);
-
-            mCurrentPosition = savedInstanceState.getInt(KEY_CURRENT_POSITION);
             mPlayerTimeStartView.setText(timeIntToString(mCurrentPosition));
-        }
-        else {
-            mTracks = mTrackListener.getTracks();
-            mArtistName = mTrackListener.getArtistName();
-            mTrackId = mTrackListener.getTrackId();
-
-            newTrack = true;
-
-            if (mTrackListener.isNotificationIntent()) {
-                autoStart = false;
-                mMainActivityControlListener.setNotificationIntent(false);
-            }
-            else {
-                autoStart = true;
-            }
+            mPlayerTimeEndView.setText(timeIntToString(mTrackDuration));
         }
 
-        setTrack(mTrackId, newTrack);
+        setTrack(mTrackId, mNewTrack);
 
-        if (autoStart) {
+        if (mAutoStart) {
             if (mBound) {
                 playTrack(mTrackId);
             }
@@ -255,9 +269,15 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
                     return;
                 }
 
+                final int playListSize = mPlayerService.getPlayListSize();
+
+                if (playListSize < 0) {
+                    Logfn.d("playlist not initialized");
+                }
+
                 final int trackId = mPlayerService.getTrackId();
 
-                if (trackId != mTrackId) {
+                if (!mPlayerService.isIdle() && (trackId != mTrackId)) {
                     mActivity.runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -512,6 +532,7 @@ public class PlayerActivityFragment extends DialogFragment implements SeekBar.On
 
     @Override
     public void onAttach(Activity activity) {
+        Logfn.d("Start");
         super.onAttach(activity);
 
         mActivity = activity;

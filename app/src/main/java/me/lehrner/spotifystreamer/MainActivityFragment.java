@@ -143,7 +143,6 @@ public class MainActivityFragment extends Fragment {
         if (mActivity.isTwoPane() && mIsNotificationIntent) {
             Logfn.d("set artist selection to " + mPosition);
             mListView.setItemChecked(mPosition, true);
-//            mActivity.getTopTracksFragment().updateTopTracks(mActivity.getArtistId(), mActivity.getArtistName(), mActivity);
             mActivity.getTopTracksFragment().getSearchResult(mActivity.getTracks());
 
             mIsNotificationIntent = false;
