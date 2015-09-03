@@ -57,6 +57,15 @@ public class MainActivityFragment extends Fragment {
         return mRootView;
     }
 
+    @Override
+    public void onResume() {
+        Logfn.d("Start");
+        super.onResume();
+
+        // avoid @string/same_artist toast after resume
+        mLastArtist = null;
+    }
+
     @SuppressLint("ShowToast")
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
