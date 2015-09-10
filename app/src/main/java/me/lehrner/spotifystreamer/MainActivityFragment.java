@@ -45,7 +45,7 @@ public class MainActivityFragment extends Fragment {
         return mPosition;
     }
 
-    public void setNotificationIntent(boolean b) {
+    public void setNotificationIntent(@SuppressWarnings("SameParameterValue") boolean b) {
         mIsNotificationIntent = b;
     }
 

@@ -32,6 +32,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
     public static final String ACTION_SET_IMAGE = "me.lehrner.spotifystreamer.SET_IMAGE";
     public static final String ACTION_SET_PROGRESS = "me.lehrner.spotifystreamer.SET_PROGRESS";
     public static final String ACTION_NOTIFICATION = "me.lehrner.spotifystreamer.NOTIFICATION";
+    public static final String ACTION_INIT = "me.lehrner.spotifystreamer.INIT";
 
     public static final String KEY_TRACK_ID = "me.lehrner.spotifystreamer.track.id";
     public static final String KEY_PLAYLIST = "me.lehrner.spotifystreamer.playlist";
@@ -52,7 +53,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
     private NotificationCompat.Builder mNotificationBuilder;
     private RemoteViews mRemoteViews;
     private String mArtist, mArtistId, mQuery;
-    private boolean mNotForeground = true, mInitialized = true;
+    private boolean mNotForeground = true;
     private NotificationManager mNotificationManager;
 
     @Override
@@ -88,8 +89,9 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
         return (mMediaPlayer != null) && mMediaPlayer.isPlaying();
     }
 
-    public int getPlayListSize() {
-        return (mPlayList != null) ? mPlayList.size() : -1;
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean isInitialized() {
+        return (mPlayList != null);
     }
 
     private void pause() {
@@ -182,6 +184,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Logfn.d("Id: " + startId);
         mStartId = startId;
 
         boolean updateNotificationTrack = false;
@@ -192,11 +195,30 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
 
                 updateNotificationPlayPause(ACTION_PLAY);
                 int trackId = intent.getIntExtra(KEY_TRACK_ID, NO_TRACK);
+
+                if (trackId == NO_TRACK) {
+                    play();
+                }
+                else {
+                    play(trackId);
+                    updateNotificationTrack = true;
+                }
+
+                setNotificationIntent();
+                break;
+            case ACTION_INIT:
+                Logfn.d("Initialize player");
+
                 ArrayList<SpotifyTrackSearchResult> playlist = intent.getParcelableArrayListExtra(KEY_PLAYLIST);
                 String artist = intent.getStringExtra(KEY_ARTIST);
                 String artistId = intent.getStringExtra(KEY_ARTIST_ID);
                 String query = intent.getStringExtra(MainActivity.KEY_QUERY);
                 int artistPosition = intent.getIntExtra(MainActivityFragment.KEY_LIST_POSITION, -1);
+                int trackID = intent.getIntExtra(KEY_TRACK_ID, NO_TRACK);
+
+                if (trackID != NO_TRACK) {
+                    mTrackId = trackID;
+                }
 
                 if (artist != null) {
                     mArtist = artist;
@@ -215,19 +237,12 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
                     mQuery = query;
                 }
 
-                if (trackId == NO_TRACK) {
-                    play();
-                }
-                else {
-                    play(trackId);
-                    updateNotificationTrack = true;
-                }
-
                 if (artistPosition != -1) {
                     mArtistPosition = artistPosition;
                 }
 
-                setNotificationIntent();
+                mPLayerState = PlayerState.COMPLETED;
+
                 break;
             case ACTION_START:
                 Logfn.d("Service started");
@@ -276,8 +291,6 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
             SpotifyTrackSearchResult track = mPlayList.get(mTrackId);
             updateNotificationTrack(mArtist, track.getTrackName(), track.getImageUrlMedium());
         }
-
-        showNotification();
 
         return START_NOT_STICKY;
     }
@@ -428,15 +441,15 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
 
         mDuration = mediaPlayer.getDuration();
 
-        if (mInitialized) {
+//        if (mInitialized) {
             mediaPlayer.start();
             mPLayerState = PlayerState.STARTED;
             updateNotificationPlayPause(ACTION_PLAY);
             Logfn.d("Started, duration: " + mDuration);
-        }
-        else {
-            mediaPlayer.seekTo(mDuration);
-        }
+//        }
+//        else {
+//            mediaPlayer.seekTo(mDuration);
+//        }
     }
 
     @Override
@@ -518,6 +531,7 @@ public class MediaPlayerService extends Service implements  MediaPlayer.OnPrepar
             mMediaPlayer = null;
         }
 
+        Logfn.d("Stop Id: " + mStartId);
         stopSelfResult(mStartId);
     }
 

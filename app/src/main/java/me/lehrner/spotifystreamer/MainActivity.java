@@ -21,7 +21,8 @@ import com.bumptech.glide.Glide;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements  PlayerActivityFragment.OnTrackSelectedListener,
-                                                                PlayerActivityFragment.OnMainActivityControlListener,
+                                                                PlayerActivityFragment.OnPlayerActivityFragmentControlListener,
+                                                                TopTracksFragment.OnTopTracksFragmentControlListener,
                                                                 AdapterView.OnItemClickListener  {
     private static final String MAIN_FRAGMENT_NAME = "MainActivityFragment";
     private static final String TOP_TRACKS_FRAGMENT_NAME = "TopTracksFragment";
@@ -31,7 +32,8 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
     private TopTracksFragment mTopTracksFragment;
     private String mQuery, mArtistId, mArtistName;
     private int mTrackId;
-    private boolean mIsNotificationIntent = false, mTwoPane;
+    private boolean mIsNotificationIntent = false, mIsNotificationIntentPlayer = false,
+            mIsNotificationIntentTracks = false, mTwoPane = false;
     private ShareActionProvider mShareActionProvider;
     private ArrayList<SpotifyTrackSearchResult> mTracks;
 
@@ -43,8 +45,22 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
         return mIsNotificationIntent;
     }
 
-    public void setNotificationIntent(boolean b) {
-        mIsNotificationIntent = b;
+    public void setNotificationIntentPlayer(boolean b) {
+        mIsNotificationIntentPlayer = b;
+
+        // set main notification intent only false if both fragments have set it
+        if (!mIsNotificationIntentPlayer && !mIsNotificationIntentTracks) {
+            mIsNotificationIntent = false;
+        }
+    }
+
+    public void setNotificationIntentTracks(boolean b) {
+        mIsNotificationIntentTracks = b;
+
+        // set main notification intent only false if both fragments have set it
+        if (!mIsNotificationIntentTracks && !mIsNotificationIntentPlayer) {
+            mIsNotificationIntent = false;
+        }
     }
 
     public TopTracksFragment getTopTracksFragment() {
@@ -56,6 +72,9 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
     }
 
     public ArrayList<SpotifyTrackSearchResult> getTracks() {
+        Logfn.d("mIsNotificationIntent: " + mIsNotificationIntent);
+        Logfn.d("mTracks: " + mTracks);
+        Logfn.d("mTopTracksFragment.getTracks(): " + mTopTracksFragment.getTracks());
         return mIsNotificationIntent ? mTracks : mTopTracksFragment.getTracks();
     }
 
@@ -88,9 +107,7 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
     public void onItemClick(AdapterView<?> adapter, View v, int position, long rowId) {
         SpotifyTrackSearchResult clickedItem = (SpotifyTrackSearchResult) adapter.getItemAtPosition(position);
 
-        ArrayList<SpotifyTrackSearchResult> tracks = getTracks();
-        mTrackId = tracks.indexOf(clickedItem);
-//        mTrackId = getTracks().indexOf(clickedItem);
+        mTrackId = getTracks().indexOf(clickedItem);
 
         if (mTrackId == -1) {
             Logfn.e("clicked item not found: " + clickedItem.toString());
@@ -174,6 +191,8 @@ public class MainActivity extends AppCompatActivity implements  PlayerActivityFr
         if (action.equals(MediaPlayerService.ACTION_NOTIFICATION)) {
             Logfn.d("Intent from Notification");
             mIsNotificationIntent = true;
+            mIsNotificationIntentPlayer = true;
+            mIsNotificationIntentTracks = true;
             mMainFragment.setNotificationIntent(true);
 
             mQuery = intent.getStringExtra(SearchManager.QUERY);

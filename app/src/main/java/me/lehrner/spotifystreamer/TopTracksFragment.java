@@ -38,8 +38,13 @@ public class TopTracksFragment extends Fragment  {
     private Activity mActivity;
     private String mArtistId, mQuery, mArtistName;
     private AdapterView.OnItemClickListener mClickListener;
+    private OnTopTracksFragmentControlListener mTopTracksFragmentControlListener;
 
     public TopTracksFragment() {
+    }
+
+    public interface OnTopTracksFragmentControlListener {
+        void setNotificationIntentTracks(@SuppressWarnings("SameParameterValue") boolean b);
     }
 
     public String getArtistName() {
@@ -102,7 +107,9 @@ public class TopTracksFragment extends Fragment  {
             Logfn.d("is not  a saved instance");
             Intent intent = mActivity.getIntent();
 
-            if ((intent != null) && (intent.getExtras() != null)) {
+            boolean twoPane = getResources().getBoolean(R.bool.two_pane);
+
+            if ((intent != null) && (intent.getExtras() != null) && !twoPane) {
                 handleIntent(intent);
             }
         }
@@ -137,7 +144,7 @@ public class TopTracksFragment extends Fragment  {
     }
 
     public void getSearchResult(ArrayList<SpotifyTrackSearchResult> searchResult) {
-        if (searchResult.isEmpty()) {
+        if (searchResult != null && searchResult.isEmpty()) {
             showToast(getString(R.string.no_track_found));
 
             if (mActivity.getClass().getSimpleName().equals("TopTracks")) {
@@ -150,6 +157,10 @@ public class TopTracksFragment extends Fragment  {
         else {
             addAllAdapter(searchResult);
             fadeListViewIn();
+        }
+
+        if (mTopTracksFragmentControlListener != null) {
+            mTopTracksFragmentControlListener.setNotificationIntentTracks(false);
         }
     }
 
@@ -166,6 +177,8 @@ public class TopTracksFragment extends Fragment  {
     }
 
     private void handleIntent(Intent intent) {
+        Logfn.d("Intent: " + intent.getAction());
+
         updateTopTracks(intent.getStringExtra(MainActivityFragment.ARTIST_ID),
                 intent.getStringExtra(MainActivityFragment.ARTIST_NAME),
                 mActivity);
@@ -183,6 +196,14 @@ public class TopTracksFragment extends Fragment  {
             mClickListener = (AdapterView.OnItemClickListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement AdapterView.OnItemClickListener");
+        }
+
+        if (getResources().getBoolean(R.bool.two_pane)) {
+            try {
+                mTopTracksFragmentControlListener = (OnTopTracksFragmentControlListener) context;
+            } catch (ClassCastException e) {
+                throw new ClassCastException(context.toString() + " must implement OnTopTracksFragmentControlListener");
+            }
         }
     }
 
